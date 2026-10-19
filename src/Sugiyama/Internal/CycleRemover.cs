@@ -24,7 +24,18 @@ internal static class CycleRemover
 
 	internal static void Run(GraphBuffer graph)
 	{
-		var nodeCount = graph.NodeCount;
+		var reversals = BackEdges(graph.NodeCount, graph.Edges.Select(e => (e.From, e.To)).ToList());
+		for (var i = 0; i < reversals.Count; i++)
+		{
+			var idx = reversals[i];
+			var e = graph.Edges[idx];
+			graph.Edges[idx] = e with { From = e.To, To = e.From, Reversed = !e.Reversed };
+		}
+	}
+
+	/// <summary>The indices of the edges <see cref="Run"/> reverses for a graph of <paramref name="nodeCount"/> nodes.</summary>
+	internal static List<int> BackEdges(int nodeCount, IReadOnlyList<(int From, int To)> edges)
+	{
 		var state = nodeCount <= 64
 			? stackalloc NodeState[nodeCount]
 			: new NodeState[nodeCount];
@@ -37,12 +48,12 @@ internal static class CycleRemover
 		var inDegree = nodeCount <= 64
 			? stackalloc int[nodeCount]
 			: new int[nodeCount];
-		for (var i = 0; i < graph.Edges.Count; i++)
+		for (var i = 0; i < edges.Count; i++)
 		{
-			var e = graph.Edges[i];
-			outEdgesPerNode[e.From].Add((e.To, i));
-			if (e.From != e.To)
-				inDegree[e.To]++;
+			var (from, to) = edges[i];
+			outEdgesPerNode[from].Add((to, i));
+			if (from != to)
+				inDegree[to]++;
 		}
 
 		var reversals = new List<int>();
@@ -64,12 +75,7 @@ internal static class CycleRemover
 				Dfs(outEdgesPerNode, n, state, reversals);
 		}
 
-		for (var i = 0; i < reversals.Count; i++)
-		{
-			var idx = reversals[i];
-			var e = graph.Edges[idx];
-			graph.Edges[idx] = e with { From = e.To, To = e.From, Reversed = !e.Reversed };
-		}
+		return reversals;
 	}
 
 	private static void Dfs(List<(int To, int EdgeIdx)>[] outEdgesPerNode, int start,

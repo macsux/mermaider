@@ -1,0 +1,13 @@
+﻿Layer 0: A
+Layer 1: B
+Layer 2: C
+Layer 3: D
+Edges:
+  A ----> B [Right->Left] [R]
+  B ----> C [Right->Left] [R]
+  C --changes requested--> B [Left->Right] [L]
+  C ----> D [Right->Left] [R]
+  D --feedback from readers--> A [Bottom->Bottom] [D L U]
+Ports:
+  B Right: edge1,edge2
+  C Left: edge1,edge2
