@@ -16,6 +16,7 @@ rfc-integration-pipeline jog-uniformity 1
 layout-lr-parallel-labels extra-bend 2
 layout-rl-back-edge balance 1
 layout-state-long-labels extra-bend 6
+layout-state-back-edge-past-label-column extra-bend 3
 db-flow-01-system extra-bend 6
 db-flow-01-system tiny-jog 3
 db-flow-01-system jog-uniformity 1

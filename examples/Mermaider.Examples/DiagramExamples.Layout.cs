@@ -91,5 +91,19 @@ public static partial class DiagramExamples
 			    UpToDate --> Ended: resource deleted
 			    Ended --> [*]
 			""", "wrapped labels"),
+
+		new("layout-state-back-edge-past-label-column", "Back Edge past a Label Column", DiagramCategory.State, """
+			stateDiagram-v2
+			    [*] --> Unreconciled: first observation creates it (spec only)
+			    Unreconciled --> Live: controller writes the first status
+			    Live --> Live: controller writes a new status (version + 1)
+			    Live --> Final: controller marks it final (e.g. merged)
+			    Final --> Live: (open) reopened, for kinds whose final state can be undone
+			    Unreconciled --> Unobserved: last observation ended
+			    Live --> Unobserved: last observation ended
+			    Final --> Unobserved: last observation ended
+			    Unobserved --> Live: observed again within a grace period
+			    Unobserved --> [*]: deleted after the grace period
+			""", "back edge around label columns"),
 	];
 }
