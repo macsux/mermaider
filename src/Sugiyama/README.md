@@ -232,10 +232,12 @@ each other or nodes they do not contain.
 3. **Prepare each level's edges.**
    - A pair of unlabelled parallel edges lays out as one edge.
    - Items that reference each other follow the direction that carries more edges.
-   - Inside a strongly connected component, a greedy feedback-arc-set order decides which edges point backwards, when
-     it turns fewer edges backwards than declaration order.
-   - A single edge that closes a cycle of three or more items leaves the level layout. The router draws it as a loop
-     around the outside instead.
+   - Inside a strongly connected component with parallel edges, a greedy feedback-arc-set order decides which edges
+     point backwards, when it turns fewer edges backwards than declaration order. Cycles whose edges all weigh the same
+     keep the DFS cycle removal, so the chain starts where it is written: `A → B → C → D` with `C → B` and `D → A`
+     lays out `A, B, C, D`, although starting at `C` would turn only one edge backwards.
+   - A single edge that the cycle removal would reverse, closing a cycle of three or more items, leaves the level
+     layout. The router draws it as a loop around the outside instead.
 4. **Run `SugiyamaLayout.Compute` on each level** in balanced mode, with at least 16 crossing restarts. Its
    port → column → port routes become hints for edges between plain nodes of that level.
 5. **Repair across levels.** Each level was ordered without seeing the edges that cross its border.
