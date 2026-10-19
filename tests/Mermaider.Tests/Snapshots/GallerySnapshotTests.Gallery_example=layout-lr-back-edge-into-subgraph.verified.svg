@@ -1,0 +1,155 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1698.42848 595.6500000000001" width="1698.42848" height="595.6500000000001" style="--bg:#FFFFFF;--fg:#27272A;--line:#546072;--accent:#3b82f6">
+<style>
+  text { font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif; }
+  .mono { font-family: ui-monospace, 'SF Mono', 'Cascadia Code', monospace; }
+  svg {
+    --_text:          var(--fg);
+    --_text-sec:      var(--muted, color-mix(in srgb, var(--fg) 72%, var(--bg)));
+    --_text-muted:    var(--muted, color-mix(in srgb, var(--fg) 64%, var(--bg)));
+    --_text-faint:    color-mix(in srgb, var(--fg) 30%, var(--bg));
+    --_line:          var(--line, color-mix(in srgb, var(--fg) 50%, var(--bg)));
+    --_line-soft:     color-mix(in srgb, var(--fg) 14%, var(--bg));
+    --_line-strong:   color-mix(in srgb, var(--fg) 68%, var(--bg));
+    --_arrow:         var(--accent, color-mix(in srgb, var(--fg) 70%, var(--bg)));
+    --_node-fill:     var(--surface, color-mix(in srgb, var(--fg) 10%, var(--bg)));
+    --_node-stroke:   var(--border, color-mix(in srgb, var(--fg) 22%, var(--bg)));
+    --_group-fill:    color-mix(in srgb, var(--fg) 4%, var(--bg));
+    --_group-hdr:     color-mix(in srgb, var(--accent, var(--fg)) 15%, var(--bg));
+    --_group-stroke:  color-mix(in srgb, var(--fg) 10%, var(--bg));
+    --_inner-stroke:  color-mix(in srgb, var(--fg) 12%, var(--bg));
+    --_key-badge:     color-mix(in srgb, var(--fg) 9%, var(--bg));
+    --_accent-fill:   color-mix(in srgb, var(--accent, var(--fg)) 8%, var(--bg));
+    --_accent-stroke: color-mix(in srgb, var(--accent, var(--fg)) 20%, var(--bg));
+    --_accent-text:   color-mix(in srgb, var(--accent, var(--fg)) 65%, var(--bg));
+    --fs-xs: 0.75rem;
+    --fs-s:  0.875rem;
+    --fs-m:  1rem;
+    --fs-l:  1.125rem;
+  }
+  .node, .actor, .entity, .class-node, .architecture-service, .kanban-card { filter: drop-shadow(0 1px 2px color-mix(in srgb, var(--fg) 12%, transparent)); }
+  .subgraph, .kanban-column { filter: drop-shadow(0 1px 2px color-mix(in srgb, var(--fg) 7%, transparent)); }
+</style>
+
+<g class="subgraph" data-id="Controllers" data-label="Controllers">
+  <rect x="16" y="63.45" width="236.932" height="411.79999999999995" rx="12" ry="12" fill="url(#m1814eb8b-cw-p1-0)" stroke="color-mix(in srgb, #f28e2b 42%, var(--bg))" stroke-width="1.25" />
+  <path d="M16,91.45 L16,75.45 Q16,63.45 28,63.45 L240.932,63.45 Q252.932,63.45 252.932,75.45 L252.932,91.45 Z" fill="color-mix(in srgb, #f28e2b 22%, var(--bg))" />
+  <line x1="16" y1="91.45" x2="252.932" y2="91.45" stroke="color-mix(in srgb, #f28e2b 42%, var(--bg))" stroke-width="1.25" />
+</g>
+<g class="subgraph" data-id="Store" data-label="Resource store">
+  <rect x="417.61856" y="190.04999999999995" width="190.64799999999997" height="158.6" rx="12" ry="12" fill="url(#m1814eb8b-cw-p2-0)" stroke="color-mix(in srgb, #76b7b2 42%, var(--bg))" stroke-width="1.25" />
+  <path d="M417.61856,218.04999999999995 L417.61856,202.04999999999995 Q417.61856,190.04999999999995 429.61856,190.04999999999995 L596.26656,190.04999999999995 Q608.26656,190.04999999999995 608.26656,202.04999999999995 L608.26656,218.04999999999995 Z" fill="color-mix(in srgb, #76b7b2 22%, var(--bg))" />
+  <line x1="417.61856" y1="218.04999999999995" x2="608.26656" y2="218.04999999999995" stroke="color-mix(in srgb, #76b7b2 42%, var(--bg))" stroke-width="1.25" />
+</g>
+<g class="subgraph" data-id="Obs" data-label="Observations">
+  <rect x="417.61856" y="384.65" width="225.76" height="195" rx="12" ry="12" fill="url(#m1814eb8b-cw-p3-0)" stroke="color-mix(in srgb, #b07aa1 42%, var(--bg))" stroke-width="1.25" />
+  <path d="M417.61856,412.65 L417.61856,396.65 Q417.61856,384.65 429.61856,384.65 L631.37856,384.65 Q643.37856,384.65 643.37856,396.65 L643.37856,412.65 Z" fill="color-mix(in srgb, #b07aa1 22%, var(--bg))" />
+  <line x1="417.61856" y1="412.65" x2="643.37856" y2="412.65" stroke="color-mix(in srgb, #b07aa1 42%, var(--bg))" stroke-width="1.25" />
+</g>
+<path class="edge" data-from="GHC" data-to="RES" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="write status" d="M188,187.95 L401.5,187.95 Q409.5,187.95 409.5,195.95 L409.5,247.95 Q409.5,255.95 417.5,255.95 L441.5,255.95" fill="none" stroke="var(--_line)" stroke-width="1.5" marker-end="url(#m1814eb8b-mk-arrow)" />
+<path class="edge" data-from="FAC" data-to="RES" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="write status" d="M216,285.45 L441.5,285.45" fill="none" stroke="var(--_line)" stroke-width="1.5" marker-end="url(#m1814eb8b-mk-arrow)" />
+<path class="edge" data-from="PLC" data-to="RES" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="write status" d="M229,382.45 L235,382.45 Q241,382.45 241,376.45 L241,322.45 Q241,314.45 249,314.45 L441.5,314.45" fill="none" stroke="var(--_line)" stroke-width="1.5" marker-end="url(#m1814eb8b-mk-arrow)" />
+<path class="edge" data-from="RES" data-to="EVAL" data-style="solid" data-arrow-start="false" data-arrow-end="true" d="M584.5,314.45 L653.5,314.45 Q661.5,314.45 661.5,322.45 L661.5,401.95 Q661.5,409.95 669.5,409.95 L683.5,409.95" fill="none" stroke="var(--_line)" stroke-width="1.5" marker-end="url(#m1814eb8b-mk-arrow)" />
+<path class="edge" data-from="OB" data-to="EVAL" data-style="solid" data-arrow-start="false" data-arrow-end="true" d="M619.5,458.45 L643.5,458.45 Q651.5,458.45 651.5,450.45 L651.5,417.95 Q651.5,409.95 659.5,409.95 L683.5,409.95" fill="none" stroke="var(--_line)" stroke-width="1.5" marker-end="url(#m1814eb8b-mk-arrow)" />
+<path class="edge" data-from="EVAL" data-to="PEND" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="yes" d="M852.41056,409.99999999999994 L966.31976,410" fill="none" stroke="var(--_line)" stroke-width="1.5" marker-end="url(#m1814eb8b-mk-arrow)" />
+<path class="edge" data-from="PEND" data-to="WRITE" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="stream idle" d="M1140.0897599999998,402.96666666666664 L1146.0897599999998,402.96666666666664 Q1152.0897599999998,402.96666666666664 1152.0897599999998,396.96666666666664 L1152.0897599999998,365.25 Q1152.0897599999998,357.25 1160.0897599999998,357.25 L1299.67648,357.25" fill="none" stroke="var(--_line)" stroke-width="1.5" marker-end="url(#m1814eb8b-mk-arrow)" />
+<path class="edge" data-from="PEND" data-to="NOTE" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="policy notify" d="M1140.0897599999998,417.0333333333333 L1146.0897599999998,417.0333333333333 Q1152.0897599999998,417.0333333333333 1152.0897599999998,423.0333333333333 L1152.0897599999998,454.75 Q1152.0897599999998,462.75 1160.0897599999998,462.75 L1299.67648,462.75" fill="none" stroke="var(--_line)" stroke-width="1.5" marker-end="url(#m1814eb8b-mk-arrow)" />
+<path class="edge" data-from="WRITE" data-to="DONE" data-style="solid" data-arrow-start="false" data-arrow-end="true" d="M1471.85048,357.25 L1479.35048,357.25 Q1486.85048,357.25 1486.85048,364.75 L1486.85048,391.93333333333334 Q1486.85048,399.93333333333334 1494.85048,399.93333333333334 L1511.85048,399.93333333333334" fill="none" stroke="var(--_line)" stroke-width="1.5" marker-end="url(#m1814eb8b-mk-arrow)" />
+<path class="edge" data-from="NOTE" data-to="DONE" data-style="solid" data-arrow-start="false" data-arrow-end="true" d="M1469.45648,462.75 L1478.85048,462.75 Q1486.85048,462.75 1486.85048,454.75 L1486.85048,428.06666666666666 Q1486.85048,420.06666666666666 1494.85048,420.06666666666666 L1511.85048,420.06666666666666" fill="none" stroke="var(--_line)" stroke-width="1.5" marker-end="url(#m1814eb8b-mk-arrow)" />
+<path class="edge" data-from="RES" data-to="GHC" data-style="dotted" data-arrow-start="false" data-arrow-end="true" data-label="controllers reconcile only
+resources with observations" d="M555,245.95 L555,43.725 Q555,35.725 547,35.725 L142.5,35.725 Q134.5,35.725 134.5,43.725 L134.5,63.45" fill="none" stroke="var(--_line)" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#m1814eb8b-mk-arrow)" />
+<text x="28" y="77.45" text-anchor="start" font-size="var(--fs-s)" font-weight="600" fill="color-mix(in srgb, #f28e2b 44%, var(--fg))" dy="4.9">Controllers</text>
+<text x="429.62" y="204.05" text-anchor="start" font-size="var(--fs-s)" font-weight="600" fill="color-mix(in srgb, #76b7b2 44%, var(--fg))" dy="4.9">Resource store</text>
+<text x="429.62" y="398.65" text-anchor="start" font-size="var(--fs-s)" font-weight="600" fill="color-mix(in srgb, #b07aa1 44%, var(--fg))" dy="4.9">Observations</text>
+<g class="edge-label" data-from="GHC" data-to="RES" data-label="write status">
+  <rect x="290.75672000000003" y="177.14999999999998" width="82.43656" height="21.6" rx="10.8" ry="10.8" fill="var(--bg)" stroke="var(--_line)" stroke-width="1.5" /> <text x="331.98" y="187.95" text-anchor="middle" font-size="var(--fs-xs)" font-weight="500" fill="var(--_text)" dy="4.2">write status</text>
+</g>
+<g class="edge-label" data-from="FAC" data-to="RES" data-label="write status">
+  <rect x="327.93844" y="274.65" width="82.43656" height="21.6" rx="10.8" ry="10.8" fill="var(--bg)" stroke="var(--_line)" stroke-width="1.5" /> <text x="369.16" y="285.45" text-anchor="middle" font-size="var(--fs-xs)" font-weight="500" fill="var(--_text)" dy="4.2">write status</text>
+</g>
+<g class="edge-label" data-from="PLC" data-to="RES" data-label="write status">
+  <rect x="327.93844" y="303.65" width="82.43656" height="21.6" rx="10.8" ry="10.8" fill="var(--bg)" stroke="var(--_line)" stroke-width="1.5" /> <text x="369.16" y="314.45" text-anchor="middle" font-size="var(--fs-xs)" font-weight="500" fill="var(--_text)" dy="4.2">write status</text>
+</g>
+<g class="edge-label" data-from="EVAL" data-to="PEND" data-label="yes">
+  <rect x="889.53556" y="399.19999999999993" width="39.6592" height="21.6" rx="10.8" ry="10.8" fill="var(--bg)" stroke="var(--_line)" stroke-width="1.5" /> <text x="909.37" y="410" text-anchor="middle" font-size="var(--fs-xs)" font-weight="500" fill="var(--_text)" dy="4.2">yes</text>
+</g>
+<g class="edge-label" data-from="PEND" data-to="WRITE" data-label="stream idle">
+  <rect x="1180.11492" y="346.45" width="79.53639999999999" height="21.6" rx="10.8" ry="10.8" fill="var(--bg)" stroke="var(--_line)" stroke-width="1.5" /> <text x="1219.88" y="357.25" text-anchor="middle" font-size="var(--fs-xs)" font-weight="500" fill="var(--_text)" dy="4.2">stream idle</text>
+</g>
+<g class="edge-label" data-from="PEND" data-to="NOTE" data-label="policy notify">
+  <rect x="1177.2147599999998" y="451.95" width="85.33672000000001" height="21.6" rx="10.8" ry="10.8" fill="var(--bg)" stroke="var(--_line)" stroke-width="1.5" /> <text x="1219.88" y="462.75" text-anchor="middle" font-size="var(--fs-xs)" font-weight="500" fill="var(--_text)" dy="4.2">policy notify</text>
+</g>
+<g class="edge-label" data-from="RES" data-to="GHC" data-label="controllers reconcile only
+resources with observations">
+  <rect x="253.14144" y="17.125" width="183.21712000000002" height="37.2" rx="10.8" ry="10.8" fill="var(--bg)" stroke="var(--_line)" stroke-width="1.5" /> <text x="344.75" y="35.73" text-anchor="middle" font-size="var(--fs-xs)" font-weight="500" fill="var(--_text)"><tspan x="344.75" dy="-3.6">controllers reconcile only</tspan><tspan x="344.75" dy="15.6">resources with observations</tspan></text>
+</g>
+<g class="node" data-id="EVAL" data-label="Status changed:
+re-evaluate each
+observation's
+JSONPath.
+Hash differs from
+delivered hash?" data-shape="hexagon">
+  <polygon points="716.67856,343.4 819.1105600000001,343.4 852.41056,410 819.1105600000001,476.59999999999997 716.67856,476.59999999999997 683.37856,410" fill="url(#m1814eb8b-ng-p0)" stroke="color-mix(in srgb, #64748b 74%, var(--fg))" stroke-width="1.25" />
+  <text x="767.89" y="410" text-anchor="middle" font-size="var(--fs-s)" font-weight="500" fill="var(--_text)"><tspan x="767.89" dy="-40.6">Status changed:</tspan><tspan x="767.89" dy="18.2">re-evaluate each</tspan><tspan x="767.89" dy="18.2">observation&#39;s</tspan><tspan x="767.89" dy="18.2">JSONPath.</tspan><tspan x="767.89" dy="18.2">Hash differs from</tspan><tspan x="767.89" dy="18.2">delivered hash?</tspan></text>
+</g>
+<g class="node" data-id="PEND" data-label="Observation pending" data-shape="rectangle">
+  <rect x="966.31976" y="388.9" width="173.76999999999998" height="42.2" rx="8" ry="8" fill="url(#m1814eb8b-ng-p0)" stroke="color-mix(in srgb, #64748b 74%, var(--fg))" stroke-width="1.25" />
+  <text x="1053.2" y="410" text-anchor="middle" font-size="var(--fs-s)" font-weight="500" fill="var(--_text)" dy="4.9">Observation pending</text>
+</g>
+<g class="node" data-id="WRITE" data-label="Write one message
+into the stream's chat
+(policy wake)" data-shape="rectangle">
+  <rect x="1299.67648" y="317.95" width="172.174" height="78.6" rx="8" ry="8" fill="url(#m1814eb8b-ng-p0)" stroke="color-mix(in srgb, #64748b 74%, var(--fg))" stroke-width="1.25" />
+  <text x="1385.76" y="357.25" text-anchor="middle" font-size="var(--fs-s)" font-weight="500" fill="var(--_text)"><tspan x="1385.76" dy="-13.3">Write one message</tspan><tspan x="1385.76" dy="18.2">into the stream&#39;s chat</tspan><tspan x="1385.76" dy="18.2">(policy wake)</tspan></text>
+</g>
+<g class="node" data-id="NOTE" data-label="Show it in Needs you
+(policy notify)" data-shape="rectangle">
+  <rect x="1299.67648" y="432.55" width="169.78" height="60.4" rx="8" ry="8" fill="url(#m1814eb8b-ng-p0)" stroke="color-mix(in srgb, #64748b 74%, var(--fg))" stroke-width="1.25" />
+  <text x="1384.57" y="462.75" text-anchor="middle" font-size="var(--fs-s)" font-weight="500" fill="var(--_text)"><tspan x="1384.57" dy="-4.2">Show it in Needs you</tspan><tspan x="1384.57" dy="18.2">(policy notify)</tspan></text>
+</g>
+<g class="node" data-id="DONE" data-label="Delivered: delivered
+hash = result hash" data-shape="rectangle">
+  <rect x="1511.85048" y="379.8" width="170.578" height="60.4" rx="8" ry="8" fill="url(#m1814eb8b-ng-p0)" stroke="color-mix(in srgb, #64748b 74%, var(--fg))" stroke-width="1.25" />
+  <text x="1597.14" y="410" text-anchor="middle" font-size="var(--fs-s)" font-weight="500" fill="var(--_text)"><tspan x="1597.14" dy="-4.2">Delivered: delivered</tspan><tspan x="1597.14" dy="18.2">hash = result hash</tspan></text>
+</g>
+<g class="node" data-id="GHC" data-label="GitHub controller
+(built-in,
+batched polling)" data-shape="rectangle">
+  <rect x="40" y="119.45" width="148.234" height="78.6" rx="8" ry="8" fill="url(#m1814eb8b-ng-p0)" stroke="color-mix(in srgb, #64748b 74%, var(--fg))" stroke-width="1.25" />
+  <text x="114.12" y="158.75" text-anchor="middle" font-size="var(--fs-s)" font-weight="500" fill="var(--_text)"><tspan x="114.12" dy="-13.3">GitHub controller</tspan><tspan x="114.12" dy="18.2">(built-in,</tspan><tspan x="114.12" dy="18.2">batched polling)</tspan></text>
+</g>
+<g class="node" data-id="FAC" data-label="FrigginAI controller
+(streams, diff
+comments, questions)" data-shape="rectangle">
+  <rect x="40" y="246.05" width="176.16400000000002" height="78.6" rx="8" ry="8" fill="url(#m1814eb8b-ng-p0)" stroke="color-mix(in srgb, #64748b 74%, var(--fg))" stroke-width="1.25" />
+  <text x="128.08" y="285.35" text-anchor="middle" font-size="var(--fs-s)" font-weight="500" fill="var(--_text)"><tspan x="128.08" dy="-13.3">FrigginAI controller</tspan><tspan x="128.08" dy="18.2">(streams, diff</tspan><tspan x="128.08" dy="18.2">comments, questions)</tspan></text>
+</g>
+<g class="node" data-id="PLC" data-label="Agent-written controller
+(plugin, own
+ALC, own NuGet)" data-shape="rectangle">
+  <rect x="40" y="372.65" width="188.932" height="78.6" rx="8" ry="8" fill="url(#m1814eb8b-ng-p0)" stroke="color-mix(in srgb, #64748b 74%, var(--fg))" stroke-width="1.25" />
+  <text x="134.47" y="411.95" text-anchor="middle" font-size="var(--fs-s)" font-weight="500" fill="var(--_text)"><tspan x="134.47" dy="-13.3">Agent-written controller</tspan><tspan x="134.47" dy="18.2">(plugin, own</tspan><tspan x="134.47" dy="18.2">ALC, own NuGet)</tspan></text>
+</g>
+<g class="node" data-id="RES" data-label="Resource
+kind + spec +
+status + version" data-shape="rectangle">
+  <rect x="441.61856" y="246.04999999999995" width="142.64799999999997" height="78.6" rx="8" ry="8" fill="url(#m1814eb8b-ng-p0)" stroke="color-mix(in srgb, #64748b 74%, var(--fg))" stroke-width="1.25" />
+  <text x="512.94" y="285.35" text-anchor="middle" font-size="var(--fs-s)" font-weight="500" fill="var(--_text)"><tspan x="512.94" dy="-13.3">Resource</tspan><tspan x="512.94" dy="18.2">kind + spec +</tspan><tspan x="512.94" dy="18.2">status + version</tspan></text>
+</g>
+<g class="node" data-id="OB" data-label="Observation
+observer, resource,
+JSONPath,
+policy,
+delivered-result hash" data-shape="rectangle">
+  <rect x="441.61856" y="440.65" width="177.76" height="115" rx="8" ry="8" fill="url(#m1814eb8b-ng-p0)" stroke="color-mix(in srgb, #64748b 74%, var(--fg))" stroke-width="1.25" />
+  <text x="530.5" y="498.15" text-anchor="middle" font-size="var(--fs-s)" font-weight="500" fill="var(--_text)"><tspan x="530.5" dy="-31.5">Observation</tspan><tspan x="530.5" dy="18.2">observer, resource,</tspan><tspan x="530.5" dy="18.2">JSONPath,</tspan><tspan x="530.5" dy="18.2">policy,</tspan><tspan x="530.5" dy="18.2">delivered-result hash</tspan></text>
+</g>
+<defs>
+  <linearGradient id="m1814eb8b-cw-p1-0" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="color-mix(in srgb, #f28e2b 2.1%, var(--bg))" /><stop offset="0.55" stop-color="color-mix(in srgb, #f28e2b 6%, var(--bg))" /><stop offset="1" stop-color="color-mix(in srgb, #f28e2b 6%, var(--bg))" /></linearGradient>
+  <linearGradient id="m1814eb8b-cw-p2-0" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="color-mix(in srgb, #76b7b2 2.1%, var(--bg))" /><stop offset="0.55" stop-color="color-mix(in srgb, #76b7b2 6%, var(--bg))" /><stop offset="1" stop-color="color-mix(in srgb, #76b7b2 6%, var(--bg))" /></linearGradient>
+  <linearGradient id="m1814eb8b-cw-p3-0" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="color-mix(in srgb, #b07aa1 2.1%, var(--bg))" /><stop offset="0.55" stop-color="color-mix(in srgb, #b07aa1 6%, var(--bg))" /><stop offset="1" stop-color="color-mix(in srgb, #b07aa1 6%, var(--bg))" /></linearGradient>
+  <linearGradient id="m1814eb8b-ng-p0" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="color-mix(in srgb, #64748b 15%, var(--bg))" /><stop offset="1" stop-color="color-mix(in srgb, #64748b 7%, var(--bg))" /></linearGradient>
+  <marker id="m1814eb8b-mk-arrow" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="12" refX="10" refY="6" orient="auto">
+    <polygon points="0,1.5 10,6 0,10.5" fill="var(--_line)" stroke="var(--_line)" stroke-width="1" stroke-linejoin="miter" />
+  </marker>
+</defs>
+</svg>

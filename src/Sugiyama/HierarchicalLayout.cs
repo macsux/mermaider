@@ -86,7 +86,7 @@ public static class HierarchicalLayout
 				var w = cp.Width + (2 * options.GroupPadding);
 				var h = cp.Height + options.GroupHeaderHeight + (2 * options.GroupPadding);
 				// leave a free column beside the title so edges can enter the box without crossing its text
-				w = Math.Max(w, Math.Max(80, 20 + (subById[child.Id].Label.Length * 7.8) + 44));
+				w = Math.Max(w, Math.Max(80, 20 + subById[child.Id].TitleWidth + 44));
 				groupBoxSize[child.Id] = (w, h);
 				itemNodes.Add(new LayoutNode("\u0001sg:" + child.Id, w, h));
 			}
@@ -143,7 +143,18 @@ public static class HierarchicalLayout
 
 			// Mutually-referencing items (a cycle through subgraph boxes) are ordered by the order that turns the fewest edges backwards;
 			// only the layout copy of the edges is re-oriented.
-			itemEdges = OrientCycles(itemNodes.Select(n => n.Id).ToList(), OrientByMajority(itemEdges));
+			var oriented = OrientCycles(itemNodes.Select(n => n.Id).ToList(), OrientByMajority(itemEdges));
+
+			// An edge turned around to run with edges the other way between a subgraph box and another item is drawn around
+			// the outside (FlowEdgeRouter: it has no level-local route); a label column for it would only widen the gap.
+			static bool IsGroupItem(string id) => id.StartsWith("\u0001sg:", StringComparison.Ordinal);
+			var withFlow = oriented.Where((e, i) => e.Source == itemEdges[i].Source).Select(e => (e.Source, e.Target)).ToHashSet();
+			var aroundOutside = Enumerable.Range(0, oriented.Count)
+				.Where(i => oriented[i].Source != itemEdges[i].Source && (IsGroupItem(oriented[i].Source) || IsGroupItem(oriented[i].Target))
+					&& withFlow.Contains((oriented[i].Source, oriented[i].Target)))
+				.ToHashSet();
+			itemOrigin = itemOrigin.Where((_, i) => !aroundOutside.Contains(i)).ToList();
+			itemEdges = oriented.Where((_, i) => !aroundOutside.Contains(i)).ToList();
 
 			// A long back edge (closing a cycle of three or more items) is drawn as a loop around the outside; keeping it in the
 			// layout only drags its chain of dummy nodes beside the forward flow and unbalances it. Two-item cycles stay (they
@@ -248,7 +259,7 @@ public static class HierarchicalLayout
 		var groupBoxes = new List<FlowEdgeRouter.GroupBox>();
 		void Flatten(GroupRect g)
 		{
-			groupBoxes.Add(new FlowEdgeRouter.GroupBox(g.Id, g.X + pad, g.Y + pad, g.W, g.H, g.NodeIds, Math.Min(g.W, 20 + (g.Label.Length * 7.8))));
+			groupBoxes.Add(new FlowEdgeRouter.GroupBox(g.Id, g.X + pad, g.Y + pad, g.W, g.H, g.NodeIds, Math.Min(g.W, 20 + subById[g.Id].TitleWidth)));
 			foreach (var c in g.Children)
 				Flatten(c);
 		}

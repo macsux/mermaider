@@ -7,9 +7,7 @@ Edges:
   B ----> C [Right->Left] [R]
   C --changes requested--> B [Left->Right] [L]
   C ----> D [Right->Left] [R]
-  D --feedback from readers--> A [Left->Right] [L U L D L]
+  D --feedback from readers--> A [Bottom->Bottom] [D L U]
 Ports:
-  A Right: edge0,edge4
   B Right: edge1,edge2
   C Left: edge1,edge2
-  D Left: edge3,edge4

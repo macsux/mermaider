@@ -417,8 +417,8 @@ internal sealed partial class DesignSystem
 	/// <summary>Height of an edge-label pill / chip (xs text + 4px each side).</summary>
 	internal const double PillHeight = 20;
 
-	/// <summary>Width of the edge label box for a measured text width.</summary>
-	internal static double LabelBoxWidth(double textWidth) => textWidth + 16;
+	/// <summary>Width of the edge label box for a measured text width (widened like the layout's reservation: the estimate runs short).</summary>
+	internal static double LabelBoxWidth(double textWidth) => (textWidth * ErSvgRenderer.TextWidthCorrection) + 16;
 
 	/// <summary>
 	/// An edge / message label centred at (<paramref name="cx"/>, <paramref name="cy"/>) in the preset's label language:
@@ -430,7 +430,8 @@ internal sealed partial class DesignSystem
 		var metrics = TextMetrics.MeasureMultiline(text.AsSpan(), px, 500);
 		var w = LabelBoxWidth(metrics.Width);
 		var h = Math.Max(PillHeight, metrics.Height + 6);
-		var r = Spec.Label == LabelKind.Chip ? Math.Min(6, h / 2) : h / 2;
+		// a wrapped label keeps the one-line pill's corners: a full half-height radius would cut into its text
+		var r = Spec.Label == LabelKind.Chip ? Math.Min(6, h / 2) : Math.Min(h, Math.Max(PillHeight, metrics.LineHeight + 6)) / 2;
 		switch (Spec.Label)
 		{
 			case LabelKind.Pill:

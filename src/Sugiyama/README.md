@@ -226,7 +226,8 @@ each other or nodes they do not contain.
 
 1. **Lay out each subgraph on its own.** Its box is the content plus `GroupPadding` on every side and
    `GroupHeaderHeight` at the top. The box is also widened so the title has a free column beside it, where edges can
-   enter without crossing the title text.
+   enter without crossing the title text. The title is as wide as `LayoutSubgraph.LabelWidth` says (the host's
+   measurement), and never narrower than 7.8px per character.
 2. **Treat each child subgraph as one node of its parent.** An edge between levels is mapped to the box that holds
    its end.
 3. **Prepare each level's edges.**
@@ -238,6 +239,8 @@ each other or nodes they do not contain.
      lays out `A, B, C, D`, although starting at `C` would turn only one edge backwards.
    - A single edge that the cycle removal would reverse, closing a cycle of three or more items, leaves the level
      layout. The router draws it as a loop around the outside instead.
+   - So does an edge turned around to run with edges the other way between a subgraph box and another item: it has no
+     level-local route, so its label column would only widen the gap.
 4. **Run `SugiyamaLayout.Compute` on each level** in balanced mode, with at least 16 crossing restarts. Its
    port → column → port routes become hints for edges between plain nodes of that level.
 5. **Repair across levels.** Each level was ordered without seeing the edges that cross its border.
@@ -256,8 +259,11 @@ after all placement is done, on absolute coordinates.
 #### Sides and ports
 
 - A forward edge leaves the side that faces the other end.
-- A back edge goes straight up when the way is free. Otherwise it leaves and enters through the side facing the
-  nearer outside edge, so it never shares ports with forward edges.
+- A back edge (against the flow, in any direction) runs straight back when the way is free. Otherwise it leaves and
+  enters through the side facing the nearer outside edge, so it never shares ports with forward edges. The way is not
+  free when boxes sit between the two ends, when, in a top-down or bottom-up flow, the ends do not line up, or when the
+  edge has no route from the level layout and forward edges run between the same two boxes (it would share their
+  corridor and its label theirs).
 - A port sits where the edge can run straight: the middle of the stretch where the two boxes overlap. Ports are
   clamped to the usable part of the side and kept 14px apart.
 - On diamonds and ellipses, ports slide onto the outline (`LayoutNode.Outline`). `PortOutline.Centre` attaches every
@@ -273,7 +279,9 @@ after all placement is done, on absolute coordinates.
 1. **The hint** from the level layout, when it is collision-free.
 2. **A canonical route.** This is a straight line, or one Z with its jog in the middle of the gap. The router accepts
    it only when it avoids every box and neither overlaps nor runs within 7px of an existing route. A back edge's
-   canonical route loops around the whole drawing on the outermost lane.
+   canonical route loops around everything it passes, on a lane beyond the outermost box level with its run. Back
+   edges looping around the same side each get a lane of their own, the shortest innermost, far enough out for a
+   label pill centred on it.
 3. **An A\* search** on a grid. The grid lines come from the box borders and an 8px margin around them, the ports and
    their stub ends, the midlines between neighbouring lines, and up to ten extra lanes 8px apart in wide gaps. Grid
    points inside a node's margin are blocked, except at the target.
@@ -310,7 +318,9 @@ edges stop after the greedy pass.
 - An unlabelled jog → column → jog route becomes one jog next to the source and a long straight run, when that stays
   clear.
 - Z-bends between the same two layers share one bend coordinate, so fans and merges look uniform. Jogs whose runs
-  overlap get adjacent lanes.
+  overlap get adjacent lanes. Labelled ones jog next to the source, so the pills get the long runs, unless the runs
+  converge on the target too closely for the pills between them: then they jog just before the target (and before
+  its subgraph). A shared coordinate that would run through another box, or on top of another edge, is not taken.
 - Each label goes on its route, just before the final arrowhead stub, so sibling labels line up. Labels avoid subgraph
   borders and labels that are already placed.
 

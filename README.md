@@ -249,6 +249,7 @@ var svg = MermaidRenderer.RenderSvg(input, new RenderOptions
 | `Border` | `string?` | unset | Optional outline for the same boxes, at the style's outline width (Tonal draws none). Lines follow it unless `Line` is set. No theme sets it |
 | `Font` | `string?` | `"Inter"` | Font family for all text |
 | `MonoFont` | `string?` | system stack | Monospace font for ER attribute types and Class member signatures |
+| `TextMeasurer` | `ITextMeasurer?` | `null` | Measures text the way the host draws it; flowchart and state layout size and wrap labels with it instead of the built-in estimate (a native renderer passes its own fonts) |
 | `FontSize` | `string?` | `"1rem"` | Base font size (`--fs-m`). Accepts `px`, `rem`, `em`, and `%` units |
 | `FontSizeSmall` | `double?` | `0.875` | Ratio for small text (`--fs-s`) |
 | `FontSizeExtraSmall` | `double?` | `0.75` | Ratio for extra-small text (`--fs-xs`) |

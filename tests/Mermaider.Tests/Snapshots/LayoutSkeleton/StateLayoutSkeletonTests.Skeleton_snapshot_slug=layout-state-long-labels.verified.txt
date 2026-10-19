@@ -1,0 +1,29 @@
+﻿Layer 0: _start, Pending
+Layer 1: UpToDate, Held
+Layer 2: Ended
+Layer 3: _end
+Edges:
+  Ended ----> _end [Bottom->Top] [D]
+  Held --hold lifts--> Pending [Top->Bottom] [U R U L U]
+  Pending --observer delivered, archived
+or abandoned (FrigginAI ends it)--> Ended [Bottom->Top] [D R D L D]
+  Pending --(open) user active in the
+stream, unanswered
+question, or stream blocked--> Held [Bottom->Top] [D R D R D]
+  Pending --stream mid-turn, more changes
+arrive (still one message later)--> Pending [Right->Right] (self)
+  Pending --status changed back before delivery--> UpToDate [Bottom->Top] [D L D L D]
+  Pending --message written into the
+chat, or shown in Needs you
+(delivered hash updated)--> UpToDate [Bottom->Top] [D L D L D]
+  UpToDate --observer releases it--> Ended [Bottom->Top] [D L D R D]
+  UpToDate --resource deleted--> Ended [Bottom->Top] [D R D L D]
+  UpToDate --status changed and result hash
+differs from delivered hash--> Pending [Top->Bottom] [U L U R U]
+  _start --registered, baseline empty--> UpToDate [Bottom->Top] [D R D]
+Ports:
+  Ended Top: edge7,edge8,edge2
+  Held Top: edge3,edge1
+  Pending Bottom: edge9,edge6,edge5,edge2,edge3,edge1
+  UpToDate Bottom: edge7,edge8
+  UpToDate Top: edge10,edge9,edge6,edge5

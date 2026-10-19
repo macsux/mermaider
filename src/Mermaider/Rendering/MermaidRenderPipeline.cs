@@ -37,6 +37,7 @@ internal static class MermaidRenderPipeline
 			var token = linkedCts?.Token ?? deadlineCts?.Token ?? ct;
 
 			using var culture = InvariantCultureScope.Enter();
+			using var measurer = Text.TextMetrics.Use(options?.TextMeasurer);
 			token.ThrowIfCancellationRequested();
 
 			var prepared = DiagramPreparationStage.Prepare(text, options, limits, token);

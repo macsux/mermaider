@@ -1,0 +1,12 @@
+﻿Layer 0: A
+Layer 1: B
+Layer 2: C
+Edges:
+  A --request token--> B [Right->Left] [R U R D R]
+  A --refresh token--> B [Right->Left] [R]
+  A --revoke--> B [Right->Left] [R D R U R]
+  B --token issued to the client--> A [Left->Right] [L D L U L]
+  B ----> C [Right->Left] [R]
+Ports:
+  A Right: edge1,edge0,edge2,edge3
+  B Left: edge1,edge0,edge2,edge3

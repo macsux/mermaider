@@ -1,0 +1,10 @@
+﻿Layer 0: A, B, C
+Layer 1: R
+Groups:
+- Sources (layer=0 order=0) members=[A, B, C]
+Edges:
+  A --sends--> R [Right->Left] [R D R]
+  B --sends--> R [Right->Left] [R]
+  C --sends--> R [Right->Left] [R U R]
+Ports:
+  R Left: edge0,edge1,edge2

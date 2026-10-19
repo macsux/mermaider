@@ -65,7 +65,13 @@ public sealed record LayoutSubgraph(
 	string Id,
 	string Label,
 	IReadOnlyList<string> NodeIds,
-	IReadOnlyList<LayoutSubgraph> Children);
+	IReadOnlyList<LayoutSubgraph> Children)
+{
+	/// <summary>Width of the title text in px, as the host measures it; a title is never taken to be narrower than its length suggests.</summary>
+	public double LabelWidth { get; init; }
+
+	internal double TitleWidth => Math.Max(LabelWidth, Label.Length * 7.8);
+}
 
 // ====================================================================
 // Options

@@ -1,0 +1,29 @@
+﻿Layer 0: GHC, FAC, PLC
+Layer 1: RES, OB
+Layer 2: EVAL
+Layer 3: PEND
+Layer 4: WRITE, NOTE
+Layer 5: DONE
+Groups:
+- Controllers (layer=0 order=0) members=[GHC, FAC, PLC]
+- Store (layer=1 order=0) members=[RES]
+- Obs (layer=1 order=1) members=[OB]
+Edges:
+  EVAL --yes--> PEND [Right->Left] [R]
+  FAC --write status--> RES [Right->Left] [R]
+  GHC --write status--> RES [Right->Left] [R D R]
+  NOTE ----> DONE [Right->Left] [R U R]
+  OB ----> EVAL [Right->Left] [R U R]
+  PEND --policy notify--> NOTE [Right->Left] [R D R]
+  PEND --stream idle--> WRITE [Right->Left] [R U R]
+  PLC --write status--> RES [Right->Left] [R U R]
+  RES ----> EVAL [Right->Left] [R D R]
+  RES --controllers reconcile only
+resources with observations--> GHC [Top->Right] [U L D]
+  WRITE ----> DONE [Right->Left] [R D R]
+Ports:
+  DONE Left: edge10,edge3
+  EVAL Left: edge8,edge4
+  GHC Right: edge9,edge2
+  PEND Right: edge6,edge5
+  RES Left: edge2,edge1,edge7

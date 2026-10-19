@@ -1,0 +1,11 @@
+﻿Layer 0: I2
+Layer 1: I1
+Layer 2: R
+Layer 3: S
+Groups:
+- Ingest (layer=0 order=0) members=[I1, I2]
+Edges:
+  I1 ----> I2 [Left->Right] [L]
+  I2 --rows--> S [Bottom->Bottom] [D R U]
+  R --reprocess failed rows--> I1 [Left->Top] [L]
+  S ----> R [Left->Right] [L]
