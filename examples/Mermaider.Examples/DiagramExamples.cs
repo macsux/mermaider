@@ -1224,6 +1224,7 @@ public static partial class DiagramExamples
 		..CreateRequirementExamples(),
 		..CreateTreeViewExamples(),
 		..CreateRealWorldExamples(),
+		..CreateLayoutExamples(),
 	];
 
 	public static DiagramExample[] ByCategory(DiagramCategory category) =>

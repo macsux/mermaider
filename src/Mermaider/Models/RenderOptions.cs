@@ -45,6 +45,12 @@ public sealed record RenderOptions
 	public string? Font { get; init; }
 
 	/// <summary>
+	/// Measures text for layout (node and label sizes, line wrapping) the way the host draws it. When null, widths are
+	/// estimated from character classes, which suits SVG shown in a browser with a sans-serif font. Default: null.
+	/// </summary>
+	public Text.ITextMeasurer? TextMeasurer { get; init; }
+
+	/// <summary>
 	/// Monospace font family for code-style text (e.g. ER attribute types, Class member signatures).
 	/// When null, falls back to the built-in system monospace stack.
 	/// </summary>

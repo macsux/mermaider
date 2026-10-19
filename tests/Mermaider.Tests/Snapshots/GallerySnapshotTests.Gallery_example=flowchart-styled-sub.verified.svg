@@ -31,9 +31,9 @@
 </style>
 
 <g class="subgraph" data-id="foo" data-label="Foo SubGraph">
-  <rect x="73.19999999999999" y="180.4" width="157.6" height="204.4" rx="12" ry="12" fill="url(#m1814eb8b-cw-p1-0)" stroke="color-mix(in srgb, #f28e2b 42%, var(--bg))" stroke-width="1.25" />
-  <path d="M73.19999999999999,208.4 L73.19999999999999,192.4 Q73.19999999999999,180.4 85.19999999999999,180.4 L218.79999999999998,180.4 Q230.79999999999998,180.4 230.79999999999998,192.4 L230.79999999999998,208.4 Z" fill="color-mix(in srgb, #f28e2b 22%, var(--bg))" />
-  <line x1="73.19999999999999" y1="208.4" x2="230.79999999999998" y2="208.4" stroke="color-mix(in srgb, #f28e2b 42%, var(--bg))" stroke-width="1.25" />
+  <rect x="69.81" y="180.4" width="164.38" height="204.4" rx="12" ry="12" fill="url(#m1814eb8b-cw-p1-0)" stroke="color-mix(in srgb, #f28e2b 42%, var(--bg))" stroke-width="1.25" />
+  <path d="M69.81,208.4 L69.81,192.4 Q69.81,180.4 81.81,180.4 L222.19,180.4 Q234.19,180.4 234.19,192.4 L234.19,208.4 Z" fill="color-mix(in srgb, #f28e2b 22%, var(--bg))" />
+  <line x1="69.81" y1="208.4" x2="234.19" y2="208.4" stroke="color-mix(in srgb, #f28e2b 42%, var(--bg))" stroke-width="1.25" />
 </g>
 <g class="subgraph" data-id="bar" data-label="Bar SubGraph">
   <rect x="40" y="424.8" width="224" height="122.2" rx="12" ry="12" fill="url(#m1814eb8b-cw-p2-0)" stroke="color-mix(in srgb, #76b7b2 42%, var(--bg))" stroke-width="1.25" />
@@ -43,10 +43,10 @@
 <path class="edge" data-from="A" data-to="B" data-style="solid" data-arrow-start="false" data-arrow-end="true" d="M152,58.2 L152,98.2" fill="none" stroke="var(--_line)" stroke-width="1.5" marker-end="url(#m1814eb8b-mk-arrow)" />
 <path class="edge" data-from="B" data-to="C" data-style="solid" data-arrow-start="false" data-arrow-end="true" d="M152,140.5 L152,164.5 Q152,172.5 160,172.5 L184,172.5 Q192,172.5 192,180.5 L192,206.5 Q192,214.5 184,214.5 L160,214.5 Q152,214.5 152,222.5 L152,236.5" fill="none" stroke="var(--_line)" stroke-width="1.5" marker-end="url(#m1814eb8b-mk-arrow)" />
 <path class="edge" data-from="C" data-to="D" data-style="solid" data-arrow-start="false" data-arrow-end="true" d="M152,278.5 L152,318.5" fill="none" stroke="var(--_line)" stroke-width="1.5" marker-end="url(#m1814eb8b-mk-arrow)" />
-<path class="edge" data-from="B" data-to="D" data-style="solid" data-arrow-start="false" data-arrow-end="true" d="M166,140.5 L166,154.5 Q166,162.5 174,162.5 L199.5,162.5 Q207.5,162.5 207.5,170.5 L207.5,288.5 Q207.5,296.5 199.5,296.5 L174,296.5 Q166,296.5 166,304.5 L166,318.5" fill="none" stroke="var(--_line)" stroke-width="1.5" marker-end="url(#m1814eb8b-mk-arrow)" />
+<path class="edge" data-from="B" data-to="D" data-style="solid" data-arrow-start="false" data-arrow-end="true" d="M166,140.5 L166,154.5 Q166,162.5 174,162.5 L200,162.5 Q208,162.5 208,170.5 L208,288.5 Q208,296.5 200,296.5 L174,296.5 Q166,296.5 166,304.5 L166,318.5" fill="none" stroke="var(--_line)" stroke-width="1.5" marker-end="url(#m1814eb8b-mk-arrow)" />
 <path class="edge" data-from="D" data-to="E" data-style="solid" data-arrow-start="false" data-arrow-end="true" d="M130,361 L130,409 Q130,417 138,417 L158,417 Q166,417 166,425 L166,451 Q166,459 158,459 L126,459 Q118,459 118,467 L118,481" fill="none" stroke="var(--_line)" stroke-width="1.5" marker-end="url(#m1814eb8b-mk-arrow)" />
 <path class="edge" data-from="E" data-to="A" data-style="solid" data-arrow-start="false" data-arrow-end="true" d="M64,502 L24,502 Q16,502 16,494 L16,45 Q16,37 24,37 L120,37" fill="none" stroke="var(--_line)" stroke-width="1.5" marker-end="url(#m1814eb8b-mk-arrow)" />
-<text x="85.2" y="194.4" text-anchor="start" font-size="var(--fs-s)" font-weight="600" fill="color-mix(in srgb, #f28e2b 44%, var(--fg))" dy="4.9">Foo SubGraph</text>
+<text x="81.81" y="194.4" text-anchor="start" font-size="var(--fs-s)" font-weight="600" fill="color-mix(in srgb, #f28e2b 44%, var(--fg))" dy="4.9">Foo SubGraph</text>
 <text x="52" y="438.8" text-anchor="start" font-size="var(--fs-s)" font-weight="600" fill="color-mix(in srgb, #76b7b2 44%, var(--fg))" dy="4.9">Bar SubGraph</text>
 <g class="node" data-id="A" data-label="A" data-shape="rectangle">
   <rect x="120" y="16" width="64" height="42.2" rx="8" ry="8" fill="url(#m1814eb8b-ng-p0)" stroke="color-mix(in srgb, #64748b 74%, var(--fg))" stroke-width="1.25" />

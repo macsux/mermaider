@@ -36,6 +36,10 @@ internal static class FlowEdgeRouter
 	private const double ForeignGroupCost = 450;
 	private const double LeaveGroupCost = 45;
 
+	// distance of the first loop-around lane from the outermost box, and the least distance between two lanes
+	private const double OutsideLane = 24;
+	private const double LaneGap = 16;
+
 	// parallel runs closer than this read as one thick line
 	private const double CrowdedGap = 7;
 
@@ -67,6 +71,9 @@ internal static class FlowEdgeRouter
 		internal bool Back => SSide == TSide;
 		internal double TStub = Stub;
 
+		// a back edge looping around the outside: how far beyond the outermost box its lane runs
+		internal double Lane = OutsideLane;
+
 		// the last grid search and the routed segments it ran against: a rip-up pass that leaves the others unchanged
 		// asks the same question again, so the answer is reused
 		internal double[]? SearchedAgainst;
@@ -81,7 +88,9 @@ internal static class FlowEdgeRouter
 		var results = new LayoutEdgeResult?[edges.Count];
 		var plans = new List<Plan>();
 		var vertical = direction is LayoutDirection.TD or LayoutDirection.BT;
+		var flowSign = direction is LayoutDirection.BT or LayoutDirection.RL ? -1 : 1;
 
+		var ends = new List<(RouteEdge Edge, Box S, Box T)>();
 		foreach (var e in edges)
 		{
 			if (!byId.TryGetValue(e.Source, out var s) || !byId.TryGetValue(e.Target, out var t))
@@ -98,10 +107,20 @@ internal static class FlowEdgeRouter
 				continue;
 			}
 
-			var (ss, ts) = ChooseSides(s, t, vertical, boxes);
+			ends.Add((e, s, t));
+		}
+
+		foreach (var (e, s, t) in ends)
+		{
+			// a back edge without a route of its own from the layout, running against forward edges between the same two boxes,
+			// would share their corridor (and its label their labels): it goes around the outside instead
+			var opposed = e.Hint is null && IsBack(s, t, vertical, flowSign)
+				&& ends.Any(o => !ReferenceEquals(o.Edge, e) && !IsBack(o.S, o.T, vertical, flowSign) && Inside(o.S, t) && Inside(o.T, s));
+			var (ss, ts) = ChooseSides(s, t, vertical, flowSign, boxes, opposed);
 			plans.Add(new Plan { Edge = e, S = s, T = t, SSide = ss, TSide = ts });
 		}
 
+		AssignLanes(plans, vertical);
 		AngleIntoSmallTargets(plans);
 		AssignPorts(plans, groups, boxes);
 
@@ -158,7 +177,7 @@ internal static class FlowEdgeRouter
 			polylines[p.Edge.Index] = ReduceBends(polylines[p.Edge.Index], p, boxes, groups);
 		foreach (var p in plans.Where(p => p.Fixed is not null))
 			polylines[p.Edge.Index] = Straighten(polylines[p.Edge.Index], p, plans);
-		UniformJogs(plans, polylines);
+		UniformJogs(plans, polylines, boxes, groups);
 
 		foreach (var p in plans)
 		{
@@ -180,19 +199,35 @@ internal static class FlowEdgeRouter
 		return g is null || g.NodeIds.Contains(otherEnd) ? node : new Box("\u0002" + groupId, g.X, g.Y, g.W, g.H, PortOutline.Rectangle, node.Id);
 	}
 
-	private static (int SSide, int TSide) ChooseSides(Box s, Box t, bool vertical, IReadOnlyList<Box> boxes)
+	private static bool IsBack(Box s, Box t, bool vertical, int flowSign) =>
+		flowSign * (vertical ? t.Cy - s.Cy : t.Cx - s.Cx) < -1;
+
+	// a box inside (or the same as) another: a node of a subgraph, or the subgraph's own border
+	private static bool Inside(Box inner, Box outer) =>
+		inner.X >= outer.X - 0.5 && inner.Right <= outer.Right + 0.5 && inner.Y >= outer.Y - 0.5 && inner.Bottom <= outer.Bottom + 0.5;
+
+	private static (int SSide, int TSide) ChooseSides(Box s, Box t, bool vertical, int flowSign, IReadOnlyList<Box> boxes, bool opposed)
 	{
-		// A back edge (target above source in a top-down flow) goes straight up when the way is free; otherwise it leaves
+		// A back edge (target before the source in the flow) runs straight back when the way is free; otherwise it leaves
 		// and enters through the side facing the nearer outside edge, so it never shares ports with the forward edges.
-		if (vertical && t.Cy < s.Cy - 1)
+		if (IsBack(s, t, vertical, flowSign))
 		{
-			var lo = Math.Max(s.X, t.X);
-			var hi = Math.Min(s.Right, t.Right);
-			var blocked = hi - lo < 10 || boxes.Any(b => b.Id != s.MemberId && b.Id != t.MemberId && b.Cy > t.Cy && b.Cy < s.Cy && b.Right > lo && b.X < hi);
+			bool Between(Box b) => vertical
+				? b.Cy > Math.Min(s.Cy, t.Cy) && b.Cy < Math.Max(s.Cy, t.Cy)
+				: b.Cx > Math.Min(s.Cx, t.Cx) && b.Cx < Math.Max(s.Cx, t.Cx);
+			var lo = vertical ? Math.Max(s.X, t.X) : Math.Max(s.Y, t.Y);
+			var hi = vertical ? Math.Min(s.Right, t.Right) : Math.Min(s.Bottom, t.Bottom);
+			// (across a left-right flow an unaligned back edge finds its own way: the search keeps it off the forward edges)
+			var blocked = opposed || (vertical && hi - lo < 10) || boxes.Any(b => b.Id != s.MemberId && b.Id != t.MemberId && Between(b)
+				&& (vertical ? b.Right > lo && b.X < hi : b.Bottom > lo && b.Y < hi));
 			if (blocked)
 			{
-				var mid = (boxes.Min(b => b.X) + boxes.Max(b => b.Right)) / 2;
-				var side = (s.Cx + t.Cx) / 2 >= mid ? 0 : 2;
+				var mid = vertical
+					? (boxes.Min(b => b.X) + boxes.Max(b => b.Right)) / 2
+					: (boxes.Min(b => b.Y) + boxes.Max(b => b.Bottom)) / 2;
+				var side = vertical
+					? (s.Cx + t.Cx) / 2 >= mid ? 0 : 2
+					: (s.Cy + t.Cy) / 2 >= mid ? 1 : 3;
 				return (side, side);
 			}
 		}
@@ -205,6 +240,26 @@ internal static class FlowEdgeRouter
 		return useVertical
 			? (dy >= 0 ? 1 : 3, dy >= 0 ? 3 : 1)
 			: (dx >= 0 ? 0 : 2, dx >= 0 ? 2 : 0);
+	}
+
+	// Back edges looping around the same side each get a lane of their own, the shortest innermost; a labelled lane is far
+	// enough out (and from its neighbours) for the label pill centred on it.
+	private static void AssignLanes(List<Plan> plans, bool vertical)
+	{
+		foreach (var side in plans.Where(p => p.Back).GroupBy(p => p.SSide))
+		{
+			double Span(Plan p) => vertical ? Math.Abs(p.T.Cy - p.S.Cy) : Math.Abs(p.T.Cx - p.S.Cx);
+			// the label's extent across the lane: its width beside an up/down lane, its height beside a left/right one
+			double Across(Plan p) => p.Edge.LabelW <= 0 ? 0 : vertical ? p.Edge.LabelW : p.Edge.LabelH;
+			Plan? previous = null;
+			foreach (var p in side.OrderBy(Span).ThenBy(p => p.Edge.Index))
+			{
+				p.Lane = previous is null
+					? Math.Max(OutsideLane, (Across(p) / 2) + Margin)
+					: previous.Lane + Math.Max(LaneGap, ((Across(previous) + Across(p)) / 2) + 4);
+				previous = p;
+			}
+		}
 	}
 
 	// Several arrows into a tiny node (an end state) would pile onto a few pixels: the outer ones come in from the sides instead.
@@ -423,7 +478,7 @@ internal static class FlowEdgeRouter
 	// other node's side can take the port at the same coordinate.
 	private static List<LayoutPoint> Straighten(List<LayoutPoint> pts, Plan p, List<Plan> plans)
 	{
-		if (pts.Count != 4)
+		if (pts.Count != 4 || p.Back)
 			return pts;
 		var vertical = Math.Abs(pts[0].X - pts[1].X) < 0.01 && Math.Abs(pts[2].X - pts[3].X) < 0.01 && Math.Abs(pts[1].Y - pts[2].Y) < 0.01;
 		var horizontal = Math.Abs(pts[0].Y - pts[1].Y) < 0.01 && Math.Abs(pts[2].Y - pts[3].Y) < 0.01 && Math.Abs(pts[1].X - pts[2].X) < 0.01;
@@ -503,14 +558,26 @@ internal static class FlowEdgeRouter
 	// accepted only when it is free of obstacles and neither overlaps nor crosses what is routed already.
 	private static List<LayoutPoint>? Canonical(Plan p, IReadOnlyList<Box> boxes, IReadOnlyList<GroupBox> groups, List<Seg> routed)
 	{
-		// A back edge that leaves through a side loops around the whole drawing: out to the outermost lane, along it, and back in.
-		if (p.Back && p.SSide is 0 or 2)
+		// A back edge that leaves through a side loops around everything it passes: out to its lane beyond the outermost box
+		// level with its run, along it, and back in.
+		if (p.Back)
 		{
-			var left = p.SSide == 2;
-			var edgeX = left
-				? Math.Min(boxes.Min(b => b.X), groups.Count > 0 ? groups.Min(g => g.X) : double.MaxValue) - 24
-				: Math.Max(boxes.Max(b => b.Right), groups.Count > 0 ? groups.Max(g => g.X + g.W) : double.MinValue) + 24;
-			List<LayoutPoint> loop = [p.SPort, new LayoutPoint(edgeX, p.SPort.Y), new LayoutPoint(edgeX, p.TPort.Y), p.TPort];
+			var across = p.SSide is 0 or 2;
+			var (from, to) = across
+				? (Math.Min(p.SPort.Y, p.TPort.Y), Math.Max(p.SPort.Y, p.TPort.Y))
+				: (Math.Min(p.SPort.X, p.TPort.X), Math.Max(p.SPort.X, p.TPort.X));
+			var spans = boxes.Select(b => (Lo: across ? b.Y : b.X, Hi: across ? b.Bottom : b.Right, Min: across ? b.X : b.Y, Max: across ? b.Right : b.Bottom))
+				.Concat(groups.Select(g => (Lo: across ? g.Y : g.X, Hi: across ? g.Y + g.H : g.X + g.W, Min: across ? g.X : g.Y, Max: across ? g.X + g.W : g.Y + g.H)))
+				.Where(r => r.Hi >= from - Margin && r.Lo <= to + Margin)
+				.ToList();
+			var outward = p.SSide is 0 or 1;
+			var start = across ? p.SPort.X : p.SPort.Y;
+			var lane = outward
+				? spans.Select(r => r.Max).DefaultIfEmpty(start).Max() + p.Lane
+				: spans.Select(r => r.Min).DefaultIfEmpty(start).Min() - p.Lane;
+			List<LayoutPoint> loop = across
+				? [p.SPort, new LayoutPoint(lane, p.SPort.Y), new LayoutPoint(lane, p.TPort.Y), p.TPort]
+				: [p.SPort, new LayoutPoint(p.SPort.X, lane), new LayoutPoint(p.TPort.X, lane), p.TPort];
 			return AcceptWithoutOverlap(p, Simplify(loop), boxes, groups, routed);
 		}
 
@@ -630,13 +697,13 @@ internal static class FlowEdgeRouter
 
 	// Z-bends between the same two layers jog at one shared coordinate (a bus line in the gap), so fans and merges look
 	// uniform and mirror-symmetric instead of each jogging at its own height.
-	private static void UniformJogs(List<Plan> plans, Dictionary<int, List<LayoutPoint>> polylines)
+	private static void UniformJogs(List<Plan> plans, Dictionary<int, List<LayoutPoint>> polylines, IReadOnlyList<Box> boxes, IReadOnlyList<GroupBox> groups)
 	{
 		var zs = new List<(Plan Plan, bool Vertical)>();
 		foreach (var p in plans)
 		{
 			var pts = polylines[p.Edge.Index];
-			if (pts.Count != 4)
+			if (pts.Count != 4 || p.Back)
 				continue;
 			var vertical = Math.Abs(pts[0].X - pts[1].X) < 0.01 && Math.Abs(pts[1].Y - pts[2].Y) < 0.01 && Math.Abs(pts[2].X - pts[3].X) < 0.01;
 			var horizontal = Math.Abs(pts[0].Y - pts[1].Y) < 0.01 && Math.Abs(pts[1].X - pts[2].X) < 0.01 && Math.Abs(pts[2].Y - pts[3].Y) < 0.01;
@@ -656,8 +723,29 @@ internal static class FlowEdgeRouter
 			var hi = list.Min(z => vertical ? z.Plan.T.Y : z.Plan.T.X) - 22;
 			if (lo > hi)
 				continue;
-			// labelled gaps jog right under the source so the pill has the long run; plain gaps jog at the middle
+			// labelled gaps jog right under the source so the pill has the long run; plain gaps jog at the middle. Where the
+			// runs converge on the target too closely for the pills between them (and leave the sources further apart), they
+			// jog just before the target instead, so the long runs, and the pills on them, stay apart.
 			var target = list.Any(z => z.Plan.Edge.LabelW > 0) ? lo : (lo + hi) / 2;
+			if (list.Any(z => z.Plan.Edge.LabelW > 0))
+			{
+				double ClosestEnds(int end)
+				{
+					var at = list.Select(z => vertical ? polylines[z.Plan.Edge.Index][end].X : polylines[z.Plan.Edge.Index][end].Y).Order().ToList();
+					return at.Zip(at.Skip(1), (a, b) => b - a).DefaultIfEmpty(double.MaxValue).Min();
+				}
+
+				// (before the subgraph the target sits in, when the source is outside it: clear of its header)
+				var late = list.Min(z => groups
+					.Where(g => g.NodeIds.Contains(z.Plan.T.MemberId) && !g.NodeIds.Contains(z.Plan.S.MemberId))
+					.Select(g => (vertical ? g.Y : g.X) - 12)
+					.DefaultIfEmpty(hi)
+					.Min());
+				var pill = list.Max(z => vertical ? z.Plan.Edge.LabelW : z.Plan.Edge.LabelH) + 8;
+				var atTarget = ClosestEnds(3);
+				if (atTarget < pill && ClosestEnds(0) > atTarget && Math.Min(late, hi) > lo)
+					target = Math.Min(late, hi);
+			}
 
 			// jogs whose runs overlap (a fan crossing a fan) get their own lane next to each other instead of sharing one line
 			(double A, double B) Span(Plan pl)
@@ -692,9 +780,13 @@ internal static class FlowEdgeRouter
 			{
 				var pts = polylines[plan.Edge.Index];
 				var at = lane[plan.Edge.Index];
-				polylines[plan.Edge.Index] = vertical
+				List<LayoutPoint> moved = vertical
 					? [pts[0], new LayoutPoint(pts[1].X, at), new LayoutPoint(pts[2].X, at), pts[3]]
 					: [pts[0], new LayoutPoint(at, pts[1].Y), new LayoutPoint(at, pts[2].Y), pts[3]];
+				// the shared line can run through a box between the layers (a wider sibling of the source), or along another
+				// edge: keep the route
+				var others = plans.Where(o => !list.Any(z => ReferenceEquals(z.Plan, o))).Select(o => polylines[o.Edge.Index]);
+				polylines[plan.Edge.Index] = CrossesOtherBox(moved, plan, boxes) || RunsAlong(moved, others) ? pts : moved;
 			}
 
 			// Two jogs on neighbouring lanes whose end run of the upper one and start run of the lower one would sit on the
@@ -725,6 +817,43 @@ internal static class FlowEdgeRouter
 				}
 			}
 		}
+	}
+
+	// a segment of the route on top of (within CrowdedGap of, and parallel to) a segment of another route for more than a few px
+	private static bool RunsAlong(List<LayoutPoint> pts, IEnumerable<List<LayoutPoint>> others)
+	{
+		foreach (var other in others)
+		{
+			for (var i = 0; i < pts.Count - 1; i++)
+			{
+				var a = new Seg(pts[i].X, pts[i].Y, pts[i + 1].X, pts[i + 1].Y);
+				for (var j = 0; j < other.Count - 1; j++)
+				{
+					var b = new Seg(other[j].X, other[j].Y, other[j + 1].X, other[j + 1].Y);
+					if (a.Horizontal != b.Horizontal)
+						continue;
+					var (along0, along1, other0, other1) = a.Horizontal ? (a.X0, a.X1, b.X0, b.X1) : (a.Y0, a.Y1, b.Y0, b.Y1);
+					var shared = Math.Min(Math.Max(along0, along1), Math.Max(other0, other1)) - Math.Max(Math.Min(along0, along1), Math.Min(other0, other1));
+					if (Math.Abs(a.Horizontal ? a.Y0 - b.Y0 : a.X0 - b.X0) < CrowdedGap && shared > 6)
+						return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	private static bool CrossesOtherBox(List<LayoutPoint> pts, Plan p, IReadOnlyList<Box> boxes)
+	{
+		for (var i = 0; i < pts.Count - 1; i++)
+		{
+			var x0 = Math.Min(pts[i].X, pts[i + 1].X);
+			var x1 = Math.Max(pts[i].X, pts[i + 1].X);
+			var y0 = Math.Min(pts[i].Y, pts[i + 1].Y);
+			var y1 = Math.Max(pts[i].Y, pts[i + 1].Y);
+			if (boxes.Any(b => b.Id != p.S.MemberId && b.Id != p.T.MemberId && x1 > b.X - 1 && x0 < b.Right + 1 && y1 > b.Y - 1 && y0 < b.Bottom + 1))
+				return true;
+		}
+		return false;
 	}
 
 	private static bool PortTaken(List<Plan> plans, Plan self, Box box, int side, double x, double y)

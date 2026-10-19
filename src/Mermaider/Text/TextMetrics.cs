@@ -18,8 +18,28 @@ internal static partial class TextMetrics
 	[GeneratedRegex(@"</?(?:b|strong|i|em|u|s|del)\s*>", RegexOptions.IgnoreCase, TimeoutMs)]
 	private static partial Regex FormattingTagPattern();
 
+	// the host's measurer for the render (or layout) running on this thread; null: the built-in estimate
+	[ThreadStatic]
+	private static ITextMeasurer? CurrentMeasurer;
+
+	/// <summary>Measures with <paramref name="measurer"/> on this thread until the scope is disposed (null keeps the current one).</summary>
+	internal static MeasurerScope Use(ITextMeasurer? measurer)
+	{
+		var scope = new MeasurerScope(CurrentMeasurer);
+		CurrentMeasurer = measurer ?? CurrentMeasurer;
+		return scope;
+	}
+
+	internal readonly struct MeasurerScope(ITextMeasurer? previous) : IDisposable
+	{
+		public void Dispose() => CurrentMeasurer = previous;
+	}
+
 	internal static double MeasureTextWidth(ReadOnlySpan<char> text, double fontSize, int fontWeight)
 	{
+		if (CurrentMeasurer is { } measurer)
+			return text.IsEmpty ? 0 : measurer.MeasureWidth(text, fontSize, fontWeight);
+
 		var baseRatio = fontWeight >= 600 ? 0.60 : fontWeight >= 500 ? 0.57 : 0.54;
 
 		var totalWidth = 0.0;

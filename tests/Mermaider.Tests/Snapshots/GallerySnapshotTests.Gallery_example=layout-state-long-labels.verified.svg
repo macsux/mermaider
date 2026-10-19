@@ -1,0 +1,119 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1542.7907200000004 467.5" width="1542.7907200000004" height="467.5" style="--bg:#FFFFFF;--fg:#27272A;--line:#546072;--accent:#3b82f6">
+<style>
+  text { font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif; }
+  .mono { font-family: ui-monospace, 'SF Mono', 'Cascadia Code', monospace; }
+  svg {
+    --_text:          var(--fg);
+    --_text-sec:      var(--muted, color-mix(in srgb, var(--fg) 72%, var(--bg)));
+    --_text-muted:    var(--muted, color-mix(in srgb, var(--fg) 64%, var(--bg)));
+    --_text-faint:    color-mix(in srgb, var(--fg) 30%, var(--bg));
+    --_line:          var(--line, color-mix(in srgb, var(--fg) 50%, var(--bg)));
+    --_line-soft:     color-mix(in srgb, var(--fg) 14%, var(--bg));
+    --_line-strong:   color-mix(in srgb, var(--fg) 68%, var(--bg));
+    --_arrow:         var(--accent, color-mix(in srgb, var(--fg) 70%, var(--bg)));
+    --_node-fill:     var(--surface, color-mix(in srgb, var(--fg) 10%, var(--bg)));
+    --_node-stroke:   var(--border, color-mix(in srgb, var(--fg) 22%, var(--bg)));
+    --_group-fill:    color-mix(in srgb, var(--fg) 4%, var(--bg));
+    --_group-hdr:     color-mix(in srgb, var(--accent, var(--fg)) 15%, var(--bg));
+    --_group-stroke:  color-mix(in srgb, var(--fg) 10%, var(--bg));
+    --_inner-stroke:  color-mix(in srgb, var(--fg) 12%, var(--bg));
+    --_key-badge:     color-mix(in srgb, var(--fg) 9%, var(--bg));
+    --_accent-fill:   color-mix(in srgb, var(--accent, var(--fg)) 8%, var(--bg));
+    --_accent-stroke: color-mix(in srgb, var(--accent, var(--fg)) 20%, var(--bg));
+    --_accent-text:   color-mix(in srgb, var(--accent, var(--fg)) 65%, var(--bg));
+    --fs-xs: 0.75rem;
+    --fs-s:  0.875rem;
+    --fs-m:  1rem;
+    --fs-l:  1.125rem;
+  }
+  .node, .actor, .entity, .class-node, .architecture-service, .kanban-card { filter: drop-shadow(0 1px 2px color-mix(in srgb, var(--fg) 12%, transparent)); }
+  .subgraph, .kanban-column { filter: drop-shadow(0 1px 2px color-mix(in srgb, var(--fg) 7%, transparent)); }
+</style>
+
+<path class="edge" data-from="_start" data-to="UpToDate" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="registered, baseline empty" d="M103.48315999999998,40 L103.48315999999998,180.75 Q103.48315999999998,188.75 111.48315999999998,188.75 L426.11508,188.75 Q434.11508,188.75 434.11508,196.75 L434.11508,213.25" fill="none" stroke="var(--_line)" stroke-width="1.5" marker-end="url(#m1814eb8b-mk-arrow)" />
+<path class="edge" data-from="UpToDate" data-to="Pending" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="status changed and result hash
+differs from delivered hash" d="M455.30307999999997,213.25 L455.30307999999997,189.75 Q455.30307999999997,181.75 447.30307999999997,181.75 L343.42524,181.75 Q335.42524,181.75 335.42524,173.75 L335.42524,87.2 Q335.42524,79.2 343.42524,79.2 L894.8234057142857,79.2 Q902.8234057142857,79.2 902.8234057142857,71.2 L902.8234057142857,58.2" fill="none" stroke="var(--_line)" stroke-width="1.5" marker-end="url(#m1814eb8b-mk-arrow)" />
+<path class="edge" data-from="Pending" data-to="UpToDate" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="status changed back before delivery" d="M916.3616914285715,58.2 L916.3616914285715,78.2 Q916.3616914285715,86.2 908.3616914285715,86.2 L604.36892,86.2 Q596.36892,86.2 596.36892,94.2 L596.36892,173.75 Q596.36892,181.75 588.36892,181.75 L484.49108,181.75 Q476.49108,181.75 476.49108,189.75 L476.49108,213.25" fill="none" stroke="var(--_line)" stroke-width="1.5" marker-end="url(#m1814eb8b-mk-arrow)" />
+<path class="edge" data-from="Pending" data-to="Held" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="(open) user active in the
+stream, unanswered
+question, or stream blocked" d="M956.9765485714286,58.2 L956.9765485714286,78.2 Q956.9765485714286,86.2 964.9765485714286,86.2 L1315.0093600000002,86.2 Q1323.0093600000002,86.2 1323.0093600000002,94.2 L1323.0093600000002,177.25 Q1323.0093600000002,185.25 1331.0093600000002,185.25 L1387.6364933333334,185.25 Q1395.6364933333334,185.25 1395.6364933333334,193.25 L1395.6364933333334,213.25" fill="none" stroke="var(--_line)" stroke-width="1.5" marker-end="url(#m1814eb8b-mk-arrow)" />
+<path class="edge" data-from="Held" data-to="Pending" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="hold lifts" d="M1419.2458266666667,213.25 L1419.2458266666667,193.25 Q1419.2458266666667,185.25 1427.2458266666667,185.25 L1483.8729600000004,185.25 Q1491.8729600000004,185.25 1491.8729600000004,177.25 L1491.8729600000004,87.2 Q1491.8729600000004,79.2 1483.8729600000004,79.2 L978.5148342857143,79.2 Q970.5148342857143,79.2 970.5148342857143,71.2 L970.5148342857143,58.2" fill="none" stroke="var(--_line)" stroke-width="1.5" marker-end="url(#m1814eb8b-mk-arrow)" />
+<path class="edge" data-from="Pending" data-to="Pending" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="stream mid-turn, more changes
+arrive (still one message later)" d="M984.05312,26.55 L1004.05312,26.55 Q1012.05312,26.55 1012.05312,34.55 L1012.05312,39.650000000000006 Q1012.05312,47.650000000000006 1004.05312,47.650000000000006 L984.05312,47.650000000000006" fill="none" stroke="var(--_line)" stroke-width="1.5" marker-end="url(#m1814eb8b-mk-arrow)" />
+<path class="edge" data-from="Pending" data-to="UpToDate" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="message written into the
+chat, or shown in Needs you
+(delivered hash updated)" d="M929.8999771428571,58.2 L929.8999771428571,85.2 Q929.8999771428571,93.2 921.8999771428571,93.2 L855.52456,93.2 Q847.52456,93.2 847.52456,101.2 L847.52456,180.75 Q847.52456,188.75 839.52456,188.75 L505.67908,188.75 Q497.67908,188.75 497.67908,196.75 L497.67908,213.25" fill="none" stroke="var(--_line)" stroke-width="1.5" marker-end="url(#m1814eb8b-mk-arrow)" />
+<path class="edge" data-from="UpToDate" data-to="Ended" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="observer releases it" d="M448.2404133333333,255.45 L448.2404133333333,275.45 Q448.2404133333333,283.45 440.2404133333333,283.45 L386.0213399999999,283.45 Q378.0213399999999,283.45 378.0213399999999,291.45 L378.0213399999999,319.3 Q378.0213399999999,327.3 386.0213399999999,327.3 L447.4475799999999,327.3 Q455.4475799999999,327.3 455.4475799999999,335.3 L455.4475799999999,355.3" fill="none" stroke="var(--_line)" stroke-width="1.5" marker-end="url(#m1814eb8b-mk-arrow)" />
+<path class="edge" data-from="Pending" data-to="Ended" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="observer delivered, archived
+or abandoned (FrigginAI ends it)" d="M943.4382628571428,58.2 L943.4382628571428,85.2 Q943.4382628571428,93.2 951.4382628571428,93.2 L1077.6294799999998,93.2 Q1085.6294799999998,93.2 1085.6294799999998,101.2 L1085.6294799999998,322.8 Q1085.6294799999998,330.8 1077.6294799999998,330.8 L505.2455799999999,330.8 Q497.2455799999999,330.8 497.2455799999999,338.8 L497.2455799999999,355.3" fill="none" stroke="var(--_line)" stroke-width="1.5" marker-end="url(#m1814eb8b-mk-arrow)" />
+<path class="edge" data-from="UpToDate" data-to="Ended" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="resource deleted" d="M483.55374666666665,255.45 L483.55374666666665,275.45 Q483.55374666666665,283.45 491.55374666666665,283.45 L545.7728199999999,283.45 Q553.7728199999999,283.45 553.7728199999999,291.45 L553.7728199999999,315.8 Q553.7728199999999,323.8 545.7728199999999,323.8 L484.3465799999999,323.8 Q476.3465799999999,323.8 476.3465799999999,331.8 L476.3465799999999,355.3" fill="none" stroke="var(--_line)" stroke-width="1.5" marker-end="url(#m1814eb8b-mk-arrow)" />
+<path class="edge" data-from="Ended" data-to="_end" data-style="solid" data-arrow-start="false" data-arrow-end="true" d="M476.3465799999999,397.5 L476.3465799999999,427.5" fill="none" stroke="var(--_line)" stroke-width="1.5" marker-end="url(#m1814eb8b-mk-arrow)" />
+<g class="edge-label" data-from="_start" data-to="UpToDate" data-label="registered, baseline empty">
+  <rect x="19.125" y="115.825" width="168.71631999999997" height="21.6" rx="10.8" ry="10.8" fill="var(--bg)" stroke="var(--_line)" stroke-width="1.5" /> <text x="103.48" y="126.63" text-anchor="middle" font-size="var(--fs-xs)" font-weight="500" fill="var(--_text)" dy="4.2">registered, baseline empty</text>
+</g>
+<g class="edge-label" data-from="UpToDate" data-to="Pending" data-label="status changed and result hash
+differs from delivered hash">
+  <rect x="237.29131999999998" y="117.125" width="196.26784" height="37.2" rx="10.8" ry="10.8" fill="var(--bg)" stroke="var(--_line)" stroke-width="1.5" /> <text x="335.43" y="135.73" text-anchor="middle" font-size="var(--fs-xs)" font-weight="500" fill="var(--_text)"><tspan x="335.43" dy="-3.6">status changed and result hash</tspan><tspan x="335.43" dy="15.6">differs from delivered hash</tspan></text>
+</g>
+<g class="edge-label" data-from="Pending" data-to="UpToDate" data-label="status changed back before delivery">
+  <rect x="483.00916" y="124.925" width="226.71952" height="21.6" rx="10.8" ry="10.8" fill="var(--bg)" stroke="var(--_line)" stroke-width="1.5" /> <text x="596.37" y="135.73" text-anchor="middle" font-size="var(--fs-xs)" font-weight="500" fill="var(--_text)" dy="4.2">status changed back before delivery</text>
+</g>
+<g class="edge-label" data-from="Pending" data-to="Held" data-label="(open) user active in the
+stream, unanswered
+question, or stream blocked">
+  <rect x="1235.3885200000002" y="109.32499999999999" width="175.24168000000003" height="52.800000000000004" rx="10.8" ry="10.8" fill="var(--bg)" stroke="var(--_line)" stroke-width="1.5" /> <text x="1323.01" y="135.73" text-anchor="middle" font-size="var(--fs-xs)" font-weight="500" fill="var(--_text)"><tspan x="1323.01" dy="-11.4">(open) user active in the</tspan><tspan x="1323.01" dy="15.6">stream, unanswered</tspan><tspan x="1323.01" dy="15.6">question, or stream blocked</tspan></text>
+</g>
+<g class="edge-label" data-from="Held" data-to="Pending" data-label="hold lifts">
+  <rect x="1460.0802000000003" y="124.925" width="63.585519999999995" height="21.6" rx="10.8" ry="10.8" fill="var(--bg)" stroke="var(--_line)" stroke-width="1.5" /> <text x="1491.87" y="135.73" text-anchor="middle" font-size="var(--fs-xs)" font-weight="500" fill="var(--_text)" dy="4.2">hold lifts</text>
+</g>
+<g class="edge-label" data-from="Pending" data-to="Pending" data-label="stream mid-turn, more changes
+arrive (still one message later)">
+  <rect x="1019.1781200000001" y="18.5" width="191.91760000000005" height="37.2" rx="10.8" ry="10.8" fill="var(--bg)" stroke="var(--_line)" stroke-width="1.5" /> <text x="1115.14" y="37.1" text-anchor="middle" font-size="var(--fs-xs)" font-weight="500" fill="var(--_text)"><tspan x="1115.14" dy="-3.6">stream mid-turn, more changes</tspan><tspan x="1115.14" dy="15.6">arrive (still one message later)</tspan></text>
+</g>
+<g class="edge-label" data-from="Pending" data-to="UpToDate" data-label="message written into the
+chat, or shown in Needs you
+(delivered hash updated)">
+  <rect x="759.17868" y="109.32499999999999" width="176.69176000000002" height="52.800000000000004" rx="10.8" ry="10.8" fill="var(--bg)" stroke="var(--_line)" stroke-width="1.5" /> <text x="847.52" y="135.73" text-anchor="middle" font-size="var(--fs-xs)" font-weight="500" fill="var(--_text)"><tspan x="847.52" dy="-11.4">message written into the</tspan><tspan x="847.52" dy="15.6">chat, or shown in Needs you</tspan><tspan x="847.52" dy="15.6">(delivered hash updated)</tspan></text>
+</g>
+<g class="edge-label" data-from="UpToDate" data-to="Ended" data-label="observer releases it">
+  <rect x="310.3390999999999" y="294.575" width="135.36448" height="21.6" rx="10.8" ry="10.8" fill="var(--bg)" stroke="var(--_line)" stroke-width="1.5" /> <text x="378.02" y="305.38" text-anchor="middle" font-size="var(--fs-xs)" font-weight="500" fill="var(--_text)" dy="4.2">observer releases it</text>
+</g>
+<g class="edge-label" data-from="Pending" data-to="Ended" data-label="observer delivered, archived
+or abandoned (FrigginAI ends it)">
+  <rect x="985.3204399999998" y="117.125" width="200.61808" height="37.2" rx="10.8" ry="10.8" fill="var(--bg)" stroke="var(--_line)" stroke-width="1.5" /> <text x="1085.63" y="135.73" text-anchor="middle" font-size="var(--fs-xs)" font-weight="500" fill="var(--_text)"><tspan x="1085.63" dy="-3.6">observer delivered, archived</tspan><tspan x="1085.63" dy="15.6">or abandoned (FrigginAI ends it)</tspan></text>
+</g>
+<g class="edge-label" data-from="UpToDate" data-to="Ended" data-label="resource deleted">
+  <rect x="495.1535799999999" y="294.575" width="117.23847999999998" height="21.6" rx="10.8" ry="10.8" fill="var(--bg)" stroke="var(--_line)" stroke-width="1.5" /> <text x="553.77" y="305.38" text-anchor="middle" font-size="var(--fs-xs)" font-weight="500" fill="var(--_text)" dy="4.2">resource deleted</text>
+</g>
+<g class="node" data-id="_start" data-label="" data-shape="statestart">
+  <circle cx="103.48315999999998" cy="28" r="10" fill="var(--accent, var(--fg))" />
+  
+</g>
+<g class="node" data-id="UpToDate" data-label="UpToDate" data-shape="rounded">
+  <rect x="412.92708" y="213.25" width="105.94" height="42.2" rx="14" ry="14" fill="url(#m1814eb8b-ng-p0)" stroke="color-mix(in srgb, #64748b 74%, var(--fg))" stroke-width="1.25" />
+  <text x="465.9" y="234.35" text-anchor="middle" font-size="var(--fs-s)" font-weight="500" fill="var(--_text)" dy="4.9">UpToDate</text>
+</g>
+<g class="node" data-id="Pending" data-label="Pending" data-shape="rounded">
+  <rect x="889.28512" y="16" width="94.768" height="42.2" rx="14" ry="14" fill="url(#m1814eb8b-ng-p0)" stroke="color-mix(in srgb, #64748b 74%, var(--fg))" stroke-width="1.25" />
+  <text x="936.67" y="37.1" text-anchor="middle" font-size="var(--fs-s)" font-weight="500" fill="var(--_text)" dy="4.9">Pending</text>
+</g>
+<g class="node" data-id="Held" data-label="Held" data-shape="rounded">
+  <rect x="1372.02716" y="213.25" width="70.828" height="42.2" rx="14" ry="14" fill="url(#m1814eb8b-ng-p0)" stroke="color-mix(in srgb, #64748b 74%, var(--fg))" stroke-width="1.25" />
+  <text x="1407.44" y="234.35" text-anchor="middle" font-size="var(--fs-s)" font-weight="500" fill="var(--_text)" dy="4.9">Held</text>
+</g>
+<g class="node" data-id="Ended" data-label="Ended" data-shape="rounded">
+  <rect x="434.5485799999999" y="355.3" width="83.596" height="42.2" rx="14" ry="14" fill="url(#m1814eb8b-ng-p0)" stroke="color-mix(in srgb, #64748b 74%, var(--fg))" stroke-width="1.25" />
+  <text x="476.35" y="376.4" text-anchor="middle" font-size="var(--fs-s)" font-weight="500" fill="var(--_text)" dy="4.9">Ended</text>
+</g>
+<g class="node" data-id="_end" data-label="" data-shape="stateend">
+  <circle cx="476.3465799999999" cy="439.5" r="10" fill="none" stroke="var(--accent, var(--fg))" stroke-width="2" />
+<circle cx="476.3465799999999" cy="439.5" r="6" fill="var(--accent, var(--fg))" />
+  
+</g>
+<defs>
+  <linearGradient id="m1814eb8b-ng-p0" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="color-mix(in srgb, #64748b 15%, var(--bg))" /><stop offset="1" stop-color="color-mix(in srgb, #64748b 7%, var(--bg))" /></linearGradient>
+  <marker id="m1814eb8b-mk-arrow" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="12" refX="10" refY="6" orient="auto">
+    <polygon points="0,1.5 10,6 0,10.5" fill="var(--_line)" stroke="var(--_line)" stroke-width="1" stroke-linejoin="miter" />
+  </marker>
+</defs>
+</svg>

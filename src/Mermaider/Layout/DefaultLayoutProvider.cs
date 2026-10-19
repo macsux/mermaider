@@ -10,8 +10,11 @@ internal sealed class DefaultLayoutProvider : IGraphLayoutProvider
 {
 	internal static readonly DefaultLayoutProvider Instance = new();
 
-	public PositionedGraph LayoutFlowchart(MermaidGraph graph, RenderOptions? options = null, StrictStylingOptions? strict = null) =>
-		LightweightLayoutEngine.Layout(graph, options, strict);
+	public PositionedGraph LayoutFlowchart(MermaidGraph graph, RenderOptions? options = null, StrictStylingOptions? strict = null)
+	{
+		using var measurer = Text.TextMetrics.Use(options?.TextMeasurer);
+		return LightweightLayoutEngine.Layout(graph, options, strict);
+	}
 
 	public PositionedClassDiagram LayoutClass(ClassDiagram diagram) =>
 		LightweightClassLayoutEngine.Layout(diagram);
