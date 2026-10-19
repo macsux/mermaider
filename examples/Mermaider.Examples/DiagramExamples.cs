@@ -65,6 +65,13 @@ public static partial class DiagramExamples
 			  E & F --> G & H
 			"""),
 
+		new("flowchart-feedback-loop", "Feedback Loop", DiagramCategory.Flowchart, """
+			flowchart LR
+			  A[Idea] --> B[Draft] --> C[Review] --> D[Publish]
+			  C -->|changes requested| B
+			  D -->|feedback from readers| A
+			"""),
+
 		new("flowchart-styled", "ClassDef Styling", DiagramCategory.Flowchart, """
 			graph TD
 			  classDef important fill:#f96,color:#fff,stroke:#333,stroke-width:2px

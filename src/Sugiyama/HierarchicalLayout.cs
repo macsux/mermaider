@@ -147,12 +147,12 @@ public static class HierarchicalLayout
 
 			// A long back edge (closing a cycle of three or more items) is drawn as a loop around the outside; keeping it in the
 			// layout only drags its chain of dummy nodes beside the forward flow and unbalances it. Two-item cycles stay (they
-			// need their label columns).
-			var itemIds = itemNodes.Select(n => n.Id).ToList();
-			var order = GreedyOrder(itemIds, itemEdges);
+			// need their label columns). The back edges are the ones the layout's own cycle breaking would turn around.
+			var itemIndex = itemNodes.Select((n, i) => (n.Id, i)).ToDictionary(t => t.Id, t => t.i, StringComparer.Ordinal);
+			var back = CycleRemover.BackEdges(itemNodes.Count, itemEdges.Select(e => (itemIndex[e.Source], itemIndex[e.Target])).ToList()).ToHashSet();
 			var pairs = itemEdges.Select(e => (e.Source, e.Target)).ToHashSet();
 			var keep = Enumerable.Range(0, itemEdges.Count)
-				.Where(i => order[itemEdges[i].Source] <= order[itemEdges[i].Target] || pairs.Contains((itemEdges[i].Target, itemEdges[i].Source)))
+				.Where(i => !back.Contains(i) || pairs.Contains((itemEdges[i].Target, itemEdges[i].Source)))
 				.ToList();
 			// (a single loop-closing edge only: dense graphs with many back edges keep them in the layout)
 			if (keep.Count == itemEdges.Count - 1)
@@ -477,9 +477,10 @@ public static class HierarchicalLayout
 	}
 
 	/// <summary>
-	/// Items that reference each other through a cycle are laid out in the order that turns the fewest edges backwards:
-	/// a weighted greedy feedback-arc-set order, used only when it beats declaration order. Only edges
-	/// inside a strongly connected component are re-oriented, and only in the layout copy.
+	/// Items that reference each other through a weighted cycle (parallel edges one way) are laid out in the order that turns the
+	/// fewest edges backwards: a greedy feedback-arc-set order, or declaration order when that is as good. Only edges inside a
+	/// strongly connected component are re-oriented, and only in the layout copy. Cycles whose edges all weigh the same keep the
+	/// default cycle breaking, which follows the order the flow is written in.
 	/// </summary>
 	private static List<LayoutEdge> OrientCycles(List<string> ids, List<LayoutEdge> edges)
 	{
@@ -488,14 +489,14 @@ public static class HierarchicalLayout
 			return edges;
 
 		var inner = edges.Where(e => scc[e.Source] == scc[e.Target]).ToList();
+		// Cycles whose edges all weigh the same keep the default cycle breaking: a feedback-arc-set order may turn fewer edges
+		// backwards, but it starts the chain in the middle (A→B→C→D with C→B and D→A comes out C, D, A, B). Weighted ones
+		// (several edges one way, few the other) follow whichever order turns the fewest edges backwards.
+		if (!inner.GroupBy(e => (e.Source, e.Target)).Any(g => g.Count() > 1))
+			return edges;
 		var declared = ids.Select((id, i) => (id, i)).ToDictionary(t => t.id, t => t.i, StringComparer.Ordinal);
 		var greedy = GreedyOrder(ids, inner);
 		int Back(Dictionary<string, int> pos) => inner.Count(e => pos[e.Source] > pos[e.Target]);
-		// Cycles whose edges all weigh the same have no better answer than the default cycle breaking; weighted ones
-		// (several edges one way, few the other) follow whichever order turns the fewest edges backwards.
-		var weighted = inner.GroupBy(e => (e.Source, e.Target)).Any(g => g.Count() > 1);
-		if (!weighted && Back(greedy) >= Back(declared))
-			return edges;
 		var pos = Back(greedy) < Back(declared) ? greedy : declared;
 		return edges.Select(e => scc[e.Source] == scc[e.Target] && pos[e.Source] > pos[e.Target] ? e with { Source = e.Target, Target = e.Source } : e).ToList();
 	}
