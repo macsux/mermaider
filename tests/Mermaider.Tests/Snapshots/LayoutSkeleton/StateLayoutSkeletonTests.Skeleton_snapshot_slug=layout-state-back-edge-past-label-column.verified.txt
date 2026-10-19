@@ -1,0 +1,26 @@
+﻿Layer 0: _start
+Layer 1: Unreconciled
+Layer 2: Live
+Layer 3: Final
+Layer 4: Unobserved
+Layer 5: _end
+Edges:
+  Final --(open) reopened, for kinds
+whose final state can be undone--> Live [Top->Bottom] [U R U L U]
+  Final --last observation ended--> Unobserved [Bottom->Top] [D]
+  Live --controller marks it final (e.g. merged)--> Final [Bottom->Top] [D L D R D]
+  Live --controller writes a new
+status (version + 1)--> Live [Right->Right] (self)
+  Live --last observation ended--> Unobserved [Bottom->Top] [D R D L D]
+  Unobserved --observed again
+within a grace period--> Live [Left->Left] [L U R]
+  Unobserved --deleted after the grace period--> _end [Bottom->Top] [D]
+  Unreconciled --controller writes the first status--> Live [Bottom->Top] [D]
+  Unreconciled --last observation ended--> Unobserved [Bottom->Top] [D R D L D]
+  _start --first observation
+creates it (spec only)--> Unreconciled [Bottom->Top] [D]
+Ports:
+  Final Top: edge2,edge0
+  Live Bottom: edge2,edge0,edge4
+  Unobserved Top: edge1,edge4,edge8
+  Unreconciled Bottom: edge7,edge8

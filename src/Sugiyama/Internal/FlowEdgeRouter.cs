@@ -142,12 +142,20 @@ internal static class FlowEdgeRouter
 		var routed = new List<Seg>();
 		var placedLabels = new List<(double X0, double Y0, double X1, double Y1)>();
 		var polylines = new Dictionary<int, List<LayoutPoint>>();
+		// the layout's own routes and their label pills reach beyond the boxes (label columns): loops around the outside clear them too
+		var laidOut = new List<(double X0, double Y0, double X1, double Y1)>();
 
 		foreach (var p in plans.Where(p => p.Fixed is not null))
 		{
 			polylines[p.Edge.Index] = p.Fixed!;
 			for (var i = 0; i < p.Fixed!.Count - 1; i++)
+			{
 				routed.Add(new Seg(p.Fixed[i].X, p.Fixed[i].Y, p.Fixed[i + 1].X, p.Fixed[i + 1].Y));
+				laidOut.Add((Math.Min(p.Fixed[i].X, p.Fixed[i + 1].X), Math.Min(p.Fixed[i].Y, p.Fixed[i + 1].Y),
+					Math.Max(p.Fixed[i].X, p.Fixed[i + 1].X), Math.Max(p.Fixed[i].Y, p.Fixed[i + 1].Y)));
+			}
+			if (p.Edge.LabelW > 0 && p.Edge.HintLabel is { } hl)
+				laidOut.Add((hl.X - (p.Edge.LabelW / 2), hl.Y - (p.Edge.LabelH / 2), hl.X + (p.Edge.LabelW / 2), hl.Y + (p.Edge.LabelH / 2)));
 		}
 
 		var ordered = plans.Where(p => p.Fixed is null).OrderBy(p => Math.Abs(p.SPort.X - p.TPort.X) + Math.Abs(p.SPort.Y - p.TPort.Y)).ToList();
@@ -159,7 +167,7 @@ internal static class FlowEdgeRouter
 			{
 				if (segsOf.TryGetValue(p.Edge.Index, out var old))
 					_ = routed.RemoveAll(old.Contains);
-				var pts = Canonical(p, boxes, groups, routed) ?? (grid ??= new Grid(boxes, groups, plans)).Find(p, groups, routed) ?? Fallback(p);
+				var pts = Canonical(p, boxes, groups, laidOut, routed) ?? (grid ??= new Grid(boxes, groups, plans)).Find(p, groups, routed) ?? Fallback(p);
 				pts = Straighten(Simplify(pts), p, plans);
 				polylines[p.Edge.Index] = pts;
 				var mine = new List<Seg>();
@@ -556,10 +564,11 @@ internal static class FlowEdgeRouter
 
 	// Straight / single-Z candidate between facing ports (jog in the middle of the gap): same shape for every such edge,
 	// accepted only when it is free of obstacles and neither overlaps nor crosses what is routed already.
-	private static List<LayoutPoint>? Canonical(Plan p, IReadOnlyList<Box> boxes, IReadOnlyList<GroupBox> groups, List<Seg> routed)
+	private static List<LayoutPoint>? Canonical(
+		Plan p, IReadOnlyList<Box> boxes, IReadOnlyList<GroupBox> groups, List<(double X0, double Y0, double X1, double Y1)> laidOut, List<Seg> routed)
 	{
-		// A back edge that leaves through a side loops around everything it passes: out to its lane beyond the outermost box
-		// level with its run, along it, and back in.
+		// A back edge that leaves through a side loops around everything it passes: out to its lane beyond the outermost box,
+		// layout route or label pill level with its run, along it, and back in.
 		if (p.Back)
 		{
 			var across = p.SSide is 0 or 2;
@@ -568,6 +577,7 @@ internal static class FlowEdgeRouter
 				: (Math.Min(p.SPort.X, p.TPort.X), Math.Max(p.SPort.X, p.TPort.X));
 			var spans = boxes.Select(b => (Lo: across ? b.Y : b.X, Hi: across ? b.Bottom : b.Right, Min: across ? b.X : b.Y, Max: across ? b.Right : b.Bottom))
 				.Concat(groups.Select(g => (Lo: across ? g.Y : g.X, Hi: across ? g.Y + g.H : g.X + g.W, Min: across ? g.X : g.Y, Max: across ? g.X + g.W : g.Y + g.H)))
+				.Concat(laidOut.Select(r => (Lo: across ? r.Y0 : r.X0, Hi: across ? r.Y1 : r.X1, Min: across ? r.X0 : r.Y0, Max: across ? r.X1 : r.Y1)))
 				.Where(r => r.Hi >= from - Margin && r.Lo <= to + Margin)
 				.ToList();
 			var outward = p.SSide is 0 or 1;

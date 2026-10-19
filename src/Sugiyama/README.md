@@ -279,7 +279,8 @@ after all placement is done, on absolute coordinates.
 1. **The hint** from the level layout, when it is collision-free.
 2. **A canonical route.** This is a straight line, or one Z with its jog in the middle of the gap. The router accepts
    it only when it avoids every box and neither overlaps nor runs within 7px of an existing route. A back edge's
-   canonical route loops around everything it passes, on a lane beyond the outermost box level with its run. Back
+   canonical route loops around everything it passes, on a lane beyond the outermost box, hint route or hint label pill
+   level with its run (a label column can reach further out than any box). Back
    edges looping around the same side each get a lane of their own, the shortest innermost, far enough out for a
    label pill centred on it.
 3. **An A\* search** on a grid. The grid lines come from the box borders and an 8px margin around them, the ports and
