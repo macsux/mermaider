@@ -1,0 +1,12 @@
+<Project>
+  <!-- Project references as absolute paths under this project's directory, spelled the way the project was reached. A
+       relative one is resolved against the working directory, which on Unix is the symlink-free path: a checkout linked
+       into another repository (FrigginAI's external/mermaider) would then build its references a second time, outside the
+       consumer's output and restore graph. -->
+  <ItemGroup>
+    <_MermaiderRelativeProjectReference Include="@(ProjectReference)" Condition="!$([System.IO.Path]::IsPathRooted('%(Identity)'))" />
+    <ProjectReference Remove="@(_MermaiderRelativeProjectReference)" />
+    <ProjectReference Include="@(_MermaiderRelativeProjectReference->'$(MSBuildProjectDirectory)/%(Identity)')" />
+    <_MermaiderRelativeProjectReference Remove="@(_MermaiderRelativeProjectReference)" />
+  </ItemGroup>
+</Project>

@@ -7,9 +7,7 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
     <IsPackable>false</IsPackable>
-    <UseArtifactsOutput>true</UseArtifactsOutput>
     <SolutionRoot>$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), build.sh))</SolutionRoot>
-    <ArtifactsPath>$(MSBuildThisFileDirectory).artifacts</ArtifactsPath>
 
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
@@ -19,6 +17,18 @@
     <MinVerDefaultPreReleaseIdentifiers>canary.0</MinVerDefaultPreReleaseIdentifiers>
     <MinVerMinimumMajorMinor>0.1</MinVerMinimumMajorMinor>
   </PropertyGroup>
+
+  <!-- A checkout linked into another repository (FrigginAI links it at external/mermaider) builds the way that repository
+       says: its Directory.Output.props, the first one above this directory, picks where output goes. On its own it builds
+       into .artifacts/. -->
+  <PropertyGroup>
+    <ConsumerOutputProps>$([MSBuild]::GetPathOfFileAbove('Directory.Output.props', '$(MSBuildThisFileDirectory)..'))</ConsumerOutputProps>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(ConsumerOutputProps)' == ''">
+    <UseArtifactsOutput>true</UseArtifactsOutput>
+    <ArtifactsPath>$(MSBuildThisFileDirectory).artifacts</ArtifactsPath>
+  </PropertyGroup>
+  <Import Project="$(ConsumerOutputProps)" Condition="'$(ConsumerOutputProps)' != ''" />
 
   <!-- src/ projects: packable, XML docs, signed -->
   <PropertyGroup Condition="$(MSBuildProjectDirectory.Replace('\','/').Contains('/src/'))">
