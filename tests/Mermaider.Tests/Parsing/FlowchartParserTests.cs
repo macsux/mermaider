@@ -152,6 +152,24 @@ public class FlowchartParserTests
 	}
 
 	[Test]
+	public void DecodesEntitiesInLabels()
+	{
+		var graph = MermaidRenderer.Parse("""
+			graph TD
+			subgraph S["streams/&lt;name&gt;/"]
+			  A["a &amp; b #quot;c#quot; #60;d#62; &#9829;"] -->|"x &gt; y"| B["`**&lt;md&gt;**`"]
+			end
+			C["&lt;br&gt; stays text #notanentity;"]
+			""");
+
+		graph.Subgraphs[0].Label.Should().Be("streams/<name>/");
+		graph.Nodes["A"].Label.Should().Be("a & b \"c\" <d> \u2665");
+		graph.Edges[0].Label.Should().Be("x > y");
+		graph.Nodes["B"].Label.Should().Be("**<md>**");
+		graph.Nodes["C"].Label.Should().Be("<br> stays text #notanentity;");
+	}
+
+	[Test]
 	public void ThrowsOnInvalidHeader()
 	{
 		var act = () => MermaidRenderer.Parse("invalid header");

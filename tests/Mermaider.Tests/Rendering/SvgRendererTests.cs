@@ -260,4 +260,16 @@ public class SvgRendererTests
 			count++;
 		return count;
 	}
+
+	[Test]
+	public void EscapesDecodedEntitiesOnce()
+	{
+		var svg = MermaidRenderer.RenderSvg("""
+			graph TD
+			  A["streams/&lt;name&gt;/"] --> B
+			""");
+
+		svg.Should().Contain("streams/&lt;name&gt;/");
+		svg.Should().NotContain("&amp;lt;");
+	}
 }

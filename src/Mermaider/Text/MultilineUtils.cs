@@ -1,4 +1,5 @@
 using System.Buffers;
+using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -22,6 +23,9 @@ internal static partial class MultilineUtils
 	[GeneratedRegex(@"</?(?:sub|sup|small|mark)\s*>", RegexOptions.IgnoreCase, TimeoutMs)]
 	private static partial Regex UnsupportedTagPattern();
 
+	[GeneratedRegex(@"(?<!&)#(\w+);", RegexOptions.None, TimeoutMs)]
+	private static partial Regex MermaidEntityPattern();
+
 	[GeneratedRegex(@"\*\*(.+?)\*\*", RegexOptions.None, TimeoutMs)]
 	private static partial Regex MarkdownBoldPattern();
 
@@ -39,7 +43,7 @@ internal static partial class MultilineUtils
 
 	/// <summary>
 	/// Normalize label text: strip quotes, convert &lt;br&gt; tags and \n to newlines,
-	/// strip unsupported tags, convert markdown formatting to HTML tags.
+	/// strip unsupported tags, convert markdown formatting to HTML tags, decode entities.
 	/// </summary>
 	internal static string NormalizeBrTags(string label)
 	{
@@ -50,7 +54,29 @@ internal static partial class MultilineUtils
 		result = MarkdownBoldPattern().Replace(result, "<b>$1</b>");
 		result = MarkdownItalicPattern().Replace(result, "<i>$1</i>");
 		result = MarkdownStrikethroughPattern().Replace(result, "<s>$1</s>");
-		return result;
+		return DecodeEntities(result);
+	}
+
+	/// <summary>
+	/// Decodes the character references Mermaid accepts in label text, HTML's (<c>&amp;lt;</c>, <c>&amp;#60;</c>) and its
+	/// own (<c>#lt;</c>, <c>#60;</c>), into the characters they name. Runs after tag handling, so an escaped
+	/// <c>&amp;lt;br&amp;gt;</c> stays text.
+	/// </summary>
+	internal static string DecodeEntities(string label)
+	{
+		if (!label.Contains(';'))
+			return label;
+
+		var references = label.Contains('#') ? MermaidEntityPattern().Replace(label, AsHtmlReference) : label;
+		return WebUtility.HtmlDecode(references);
+	}
+
+	/// <summary>Mermaid's <c>#name;</c> / <c>#60;</c> as HTML's reference, or left as written when it names nothing.</summary>
+	private static string AsHtmlReference(Match m)
+	{
+		var name = m.Groups[1].Value;
+		var html = (char.IsAsciiDigit(name[0]) ? "&#" : "&") + name + ";";
+		return WebUtility.HtmlDecode(html) != html ? html : m.Value;
 	}
 
 	internal static void AppendEscapedXml(StringBuilder sb, ReadOnlySpan<char> value)
