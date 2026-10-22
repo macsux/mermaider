@@ -37,6 +37,9 @@ internal static partial class TextMetrics
 
 	internal static double MeasureTextWidth(ReadOnlySpan<char> text, double fontSize, int fontWeight)
 	{
+		if (text.Contains('&'))
+			text = MultilineUtils.UnescapeMarkup(text.ToString());
+
 		if (CurrentMeasurer is { } measurer)
 			return text.IsEmpty ? 0 : measurer.MeasureWidth(text, fontSize, fontWeight);
 

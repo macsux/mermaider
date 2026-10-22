@@ -207,4 +207,12 @@ public class AsciiRenderTests
 		svg.Should().Contain("<rect", "the middle half is a rectangle");
 		svg.Should().Contain("<line", "the whiskers and the median are lines");
 	}
+
+	[Test]
+	public void Escaped_characters_in_a_label_are_drawn_as_themselves()
+	{
+		var text = MermaidRenderer.RenderAscii("flowchart LR\n  A[\"&lt;br&gt; &amp;lt;\"] --> B");
+
+		text.Should().Contain("<br> &lt;");
+	}
 }
