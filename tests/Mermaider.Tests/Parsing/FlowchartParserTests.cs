@@ -162,11 +162,12 @@ public class FlowchartParserTests
 			C["&lt;br&gt; stays text #notanentity;"]
 			""");
 
-		graph.Subgraphs[0].Label.Should().Be("streams/<name>/");
-		graph.Nodes["A"].Label.Should().Be("a & b \"c\" <d> \u2665");
-		graph.Edges[0].Label.Should().Be("x > y");
-		graph.Nodes["B"].Label.Should().Be("**<md>**");
-		graph.Nodes["C"].Label.Should().Be("<br> stays text #notanentity;");
+		// &, < and > stay references, apart from the label's own tags
+		graph.Subgraphs[0].Label.Should().Be("streams/&lt;name&gt;/");
+		graph.Nodes["A"].Label.Should().Be("a &amp; b \"c\" &lt;d&gt; \u2665");
+		graph.Edges[0].Label.Should().Be("x &gt; y");
+		graph.Nodes["B"].Label.Should().Be("**&lt;md&gt;**");
+		graph.Nodes["C"].Label.Should().Be("&lt;br&gt; stays text #notanentity;");
 	}
 
 	[Test]

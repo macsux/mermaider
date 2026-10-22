@@ -23,8 +23,8 @@ internal static partial class MultilineUtils
 	[GeneratedRegex(@"</?(?:sub|sup|small|mark)\s*>", RegexOptions.IgnoreCase, TimeoutMs)]
 	private static partial Regex UnsupportedTagPattern();
 
-	[GeneratedRegex(@"(?<!&)#(\w+);", RegexOptions.None, TimeoutMs)]
-	private static partial Regex MermaidEntityPattern();
+	[GeneratedRegex(@"&(#?\w+);|(?<!&)#(\w+);", RegexOptions.None, TimeoutMs)]
+	private static partial Regex CharacterReferencePattern();
 
 	[GeneratedRegex(@"\*\*(.+?)\*\*", RegexOptions.None, TimeoutMs)]
 	private static partial Regex MarkdownBoldPattern();
@@ -58,26 +58,54 @@ internal static partial class MultilineUtils
 	}
 
 	/// <summary>
-	/// Decodes the character references Mermaid accepts in label text, HTML's (<c>&amp;lt;</c>, <c>&amp;#60;</c>) and its
-	/// own (<c>#lt;</c>, <c>#60;</c>), into the characters they name. Runs after tag handling, so an escaped
-	/// <c>&amp;lt;br&amp;gt;</c> stays text.
+	/// Decodes the character references Mermaid accepts in label text, HTML's (<c>&amp;quot;</c>, <c>&amp;#9829;</c>) and
+	/// its own (<c>#quot;</c>, <c>#9829;</c>), into the characters they name. One naming <c>&amp;</c>, <c>&lt;</c> or
+	/// <c>&gt;</c> becomes <c>&amp;amp;</c>, <c>&amp;lt;</c> or <c>&amp;gt;</c>, so an escaped <c>&amp;lt;b&amp;gt;</c> stays
+	/// text beside the label's formatting tags: writers and measurers read those three back with <see cref="UnescapeMarkup"/>
+	/// (<see cref="AppendEscapedXml"/> passes them through).
 	/// </summary>
-	internal static string DecodeEntities(string label)
-	{
-		if (!label.Contains(';'))
-			return label;
+	internal static string DecodeEntities(string label) =>
+		label.Contains(';') ? CharacterReferencePattern().Replace(label, DecodeReference) : label;
 
-		var references = label.Contains('#') ? MermaidEntityPattern().Replace(label, AsHtmlReference) : label;
-		return WebUtility.HtmlDecode(references);
+	private static string DecodeReference(Match m)
+	{
+		var name = m.Groups[1].Success ? m.Groups[1].Value : m.Groups[2].Value;
+		var html = (m.Groups[2].Success && char.IsAsciiDigit(name[0]) ? "&#" : "&") + name + ";";
+		return WebUtility.HtmlDecode(html) switch
+		{
+			var same when same == html => m.Value,
+			"&" => "&amp;",
+			"<" => "&lt;",
+			">" => "&gt;",
+			var c => c
+		};
 	}
 
-	/// <summary>Mermaid's <c>#name;</c> / <c>#60;</c> as HTML's reference, or left as written when it names nothing.</summary>
-	private static string AsHtmlReference(Match m)
+	/// <summary>The text a label's <c>&amp;amp;</c>, <c>&amp;lt;</c> and <c>&amp;gt;</c> stand for (see <see cref="DecodeEntities"/>).</summary>
+	internal static string UnescapeMarkup(string text)
 	{
-		var name = m.Groups[1].Value;
-		var html = (char.IsAsciiDigit(name[0]) ? "&#" : "&") + name + ";";
-		return WebUtility.HtmlDecode(html) != html ? html : m.Value;
+		if (!text.Contains('&'))
+			return text;
+
+		var sb = new StringBuilder(text.Length);
+		for (var i = 0; i < text.Length; i++)
+		{
+			var length = MarkupReferenceLength(text.AsSpan(i));
+			if (length == 0)
+			{
+				_ = sb.Append(text[i]);
+				continue;
+			}
+
+			_ = sb.Append(text[i + 1] switch { 'l' => '<', 'g' => '>', _ => '&' });
+			i += length - 1;
+		}
+		return sb.ToString();
 	}
+
+	/// <summary>The length of the <c>&amp;amp;</c>, <c>&amp;lt;</c> or <c>&amp;gt;</c> <paramref name="text"/> starts with, else 0.</summary>
+	private static int MarkupReferenceLength(ReadOnlySpan<char> text) =>
+		text.StartsWith("&lt;") || text.StartsWith("&gt;") ? 4 : text.StartsWith("&amp;") ? 5 : 0;
 
 	internal static void AppendEscapedXml(StringBuilder sb, ReadOnlySpan<char> value)
 	{
@@ -87,16 +115,17 @@ internal static partial class MultilineUtils
 			return;
 		}
 
-		foreach (var c in value)
+		for (var i = 0; i < value.Length; i++)
 		{
-			_ = c switch
+			_ = value[i] switch
 			{
+				'&' when MarkupReferenceLength(value[i..]) > 0 => sb.Append('&'),
 				'&' => sb.Append("&amp;"),
 				'<' => sb.Append("&lt;"),
 				'>' => sb.Append("&gt;"),
 				'"' => sb.Append("&quot;"),
 				'\'' => sb.Append("&#39;"),
-				_ => sb.Append(c)
+				var c => sb.Append(c)
 			};
 		}
 	}
@@ -125,15 +154,16 @@ internal static partial class MultilineUtils
 			return;
 		}
 
-		foreach (var c in value)
+		for (var i = 0; i < value.Length; i++)
 		{
-			_ = c switch
+			_ = value[i] switch
 			{
+				'&' when MarkupReferenceLength(value[i..]) > 0 => sb.Append('&'),
 				'&' => sb.Append("&amp;"),
 				'"' => sb.Append("&quot;"),
 				'<' => sb.Append("&lt;"),
 				'>' => sb.Append("&gt;"),
-				_ => sb.Append(c)
+				var c => sb.Append(c)
 			};
 		}
 	}

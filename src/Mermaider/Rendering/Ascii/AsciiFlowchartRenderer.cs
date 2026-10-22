@@ -1,4 +1,5 @@
 using Mermaider.Models;
+using Mermaider.Text;
 using Sugiyama;
 
 namespace Mermaider.Rendering.Ascii;
@@ -393,8 +394,8 @@ internal static class AsciiFlowchartRenderer
 
 	/// <summary>A label is one line here: a break in a box three rows tall has nowhere to go.</summary>
 	private static string Flatten(string label) =>
-		label.Replace("<br/>", " ", StringComparison.OrdinalIgnoreCase)
+		MultilineUtils.UnescapeMarkup(label.Replace("<br/>", " ", StringComparison.OrdinalIgnoreCase)
 			.Replace("<br>", " ", StringComparison.OrdinalIgnoreCase)
 			.Replace('\n', ' ')
-			.Trim();
+			.Trim());
 }

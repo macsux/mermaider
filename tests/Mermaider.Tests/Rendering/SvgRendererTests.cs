@@ -272,4 +272,15 @@ public class SvgRendererTests
 		svg.Should().Contain("streams/&lt;name&gt;/");
 		svg.Should().NotContain("&amp;lt;");
 	}
+
+	[Test]
+	public void KeepsEscapedFormattingTagsAsText()
+	{
+		var svg = MermaidRenderer.RenderSvg("""
+			graph TD
+			  A["tag &lt;b&gt;x&lt;/b&gt; &amp;lt; **bold**"] --> B
+			""");
+
+		svg.Should().Contain("tag &lt;b&gt;x&lt;/b&gt; &amp;lt; <tspan font-weight=\"bold\">bold</tspan>");
+	}
 }
