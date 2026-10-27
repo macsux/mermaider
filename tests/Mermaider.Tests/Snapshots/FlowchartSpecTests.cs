@@ -231,4 +231,35 @@ public class FlowchartSpecTests
 			graph TD
 			A["`The **cat** in the hat`"] --> B["`*Italic* text`"]
 			"""), "svg");
+
+	// big enough for the router's grid search and the crossing refinement to do real work (a regression guard for their speed-ups)
+	[Test]
+	public Task Forty_nodes_in_subgraphs() =>
+		Verifier.Verify(MermaidRenderer.RenderSvg(GeneratedFlowchart(nodes: 40, perGroup: 10)), "svg");
+
+	// more subgraphs than the router tracks with one bit each
+	[Test]
+	public Task Many_small_subgraphs() =>
+		Verifier.Verify(MermaidRenderer.RenderSvg(GeneratedFlowchart(nodes: 66, perGroup: 1)), "svg");
+
+	// node i hangs off a random earlier node (labelled edge); every third node also links to a random node
+	private static string GeneratedFlowchart(int nodes, int perGroup)
+	{
+		var rng = new Random(1);
+		var sb = new System.Text.StringBuilder("flowchart TD\n");
+		for (var g = 0; g * perGroup < nodes; g++)
+		{
+			sb.Append($"  subgraph S{g}[Group {g}]\n");
+			for (var i = g * perGroup; i < Math.Min(nodes, (g + 1) * perGroup); i++)
+				sb.Append($"    N{i}[Node number {i} with label]\n");
+			sb.Append("  end\n");
+		}
+		for (var i = 1; i < nodes; i++)
+		{
+			sb.Append($"  N{rng.Next(i)} -->|edge {i}| N{i}\n");
+			if (i % 3 == 0)
+				sb.Append($"  N{i} --> N{rng.Next(nodes)}\n");
+		}
+		return sb.ToString();
+	}
 }

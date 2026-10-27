@@ -167,7 +167,7 @@ internal static class FlowEdgeRouter
 			{
 				if (segsOf.TryGetValue(p.Edge.Index, out var old))
 					_ = routed.RemoveAll(old.Contains);
-				var pts = Canonical(p, boxes, groups, laidOut, routed) ?? (grid ??= new Grid(boxes, groups, plans)).Find(p, groups, routed) ?? Fallback(p);
+				var pts = Canonical(p, boxes, groups, laidOut, routed) ?? (grid ??= new Grid(boxes, groups, plans)).Find(p, routed) ?? Fallback(p);
 				pts = Straighten(Simplify(pts), p, plans);
 				polylines[p.Edge.Index] = pts;
 				var mine = new List<Seg>();
@@ -1041,6 +1041,13 @@ internal static class FlowEdgeRouter
 		private readonly GroupBox[] _allGroups;
 		private readonly MinHeap _pq = new();
 
+		// which subgraphs each grid line (and the midpoint between two neighbouring lines) falls in, one bit per subgraph, so a
+		// step visits only the subgraphs that add to its cost; null when there are too many subgraphs for a bit each
+		private readonly GroupLines? _groupsX;
+		private readonly GroupLines? _groupsY;
+		private ulong _foreignMask;
+		private ulong _commonMask;
+
 		// routed segments bucketed by the grid lines/intervals a step could interact with; buckets keep routed order so the
 		// step cost sums its terms exactly as a scan over every routed segment would
 		private readonly SegBuckets _parallelOnRow; // horizontal segments within RouteGap of row y
@@ -1105,6 +1112,12 @@ internal static class FlowEdgeRouter
 				}
 			}
 
+			if (_allGroups.Length <= 64)
+			{
+				_groupsX = new GroupLines(_xs, _allGroups, g => (g.X, g.X + g.W, g.X + g.LabelW, g.X - Margin, g.X + g.W + Margin));
+				_groupsY = new GroupLines(_ys, _allGroups, g => (g.Y, g.Y + g.H, g.Y + 30, g.Y - Margin, g.Y + g.H + Margin));
+			}
+
 			_space = SearchSpace.Rent(n);
 			_hx = new double[_xs.Length];
 			_hy = new double[_ys.Length];
@@ -1163,11 +1176,11 @@ internal static class FlowEdgeRouter
 			return i >= 0 ? i : -1;
 		}
 
-		internal List<LayoutPoint>? Find(Plan p, IReadOnlyList<GroupBox> groups, List<Seg> routed)
+		internal List<LayoutPoint>? Find(Plan p, List<Seg> routed)
 		{
 			if (p.SearchedAgainst is { } seen && SameSegments(seen, routed))
 				return p.SearchResult is null ? null : [.. p.SearchResult];
-			var path = Search(p, groups, routed);
+			var path = Search(p, routed);
 			p.SearchedAgainst = Snapshot(routed);
 			p.SearchResult = path is null ? null : [.. path];
 			return path;
@@ -1279,7 +1292,7 @@ internal static class FlowEdgeRouter
 			return lo;
 		}
 
-		private List<LayoutPoint>? Search(Plan p, IReadOnlyList<GroupBox> groups, List<Seg> routed)
+		private List<LayoutPoint>? Search(Plan p, List<Seg> routed)
 		{
 			var a = Out(p.SPort, p.SSide, p.SStub);
 			var b = Out(p.TPort, p.TSide, p.TStub);
@@ -1292,14 +1305,23 @@ internal static class FlowEdgeRouter
 
 			var foreign = new List<GroupBox>();
 			var common = new List<GroupBox>();
-			foreach (var g in groups)
+			_foreignMask = 0;
+			_commonMask = 0;
+			for (var gi = 0; gi < _allGroups.Length; gi++)
 			{
+				var g = _allGroups[gi];
 				var hasS = g.NodeIds.Contains(p.S.MemberId);
 				var hasT = g.NodeIds.Contains(p.T.MemberId);
 				if (hasS && hasT)
+				{
 					common.Add(g);
+					_commonMask |= 1UL << gi;
+				}
 				else if (!hasS && !hasT)
+				{
 					foreign.Add(g);
+					_foreignMask |= 1UL << gi;
+				}
 			}
 
 			var version = _space.NextVersion();
@@ -1421,32 +1443,11 @@ internal static class FlowEdgeRouter
 			var cost = len * _lengthWeight;
 			if (dir < 4 && dir != nd)
 				cost += BendCost;
-			var mx = (x0 + x1) / 2;
-			var my = (y0 + y1) / 2;
-			foreach (var g in foreign)
-			{
-				if (mx > g.X && mx < g.X + g.W && my > g.Y && my < g.Y + g.H)
-					cost += ForeignGroupCost + (len * 2);
-				// running alongside a foreign subgraph border reads as belonging to it
-				else if (nd is 0 or 2 && mx > g.X && mx < g.X + g.W && (Math.Abs(my - (g.Y - Margin)) < 0.6 || Math.Abs(my - (g.Y + g.H + Margin)) < 0.6))
-					cost += len * 0.6;
-				else if (nd is 1 or 3 && my > g.Y && my < g.Y + g.H && (Math.Abs(mx - (g.X - Margin)) < 0.6 || Math.Abs(mx - (g.X + g.W + Margin)) < 0.6))
-					cost += len * 0.6;
-			}
-			foreach (var g in common)
-			{
-				if (!(mx > g.X && mx < g.X + g.W && my > g.Y && my < g.Y + g.H))
-					cost += LeaveGroupCost + len;
-			}
-
-			foreach (var g in _allGroups)
-			{
-				// keep lines off the subgraph's title text
-				if (g.LabelW > 0 && mx > g.X && mx < g.X + g.LabelW && my > g.Y && my < g.Y + 30)
-					cost += 90 + len;
-			}
-
 			var horizontal = nd is 0 or 2;
+			cost = _groupsX is { } gx && _groupsY is { } gy
+				? GroupCost(cost, len, horizontal, x, y, nx, ny, gx, gy)
+				: GroupCost(cost, len, nd, (x0 + x1) / 2, (y0 + y1) / 2, foreign, common);
+
 			// the parallel and crossing candidates, merged back into routed order
 			var par = horizontal ? _parallelOnRow.Of(y) : _parallelOnColumn.Of(x);
 			var cross = horizontal ? _crossingColumn.Of(Math.Min(x, nx)) : _crossingRow.Of(Math.Min(y, ny));
@@ -1476,6 +1477,123 @@ internal static class FlowEdgeRouter
 				}
 			}
 			return cost;
+		}
+
+		// The subgraph terms of a step's cost, read off the per-line bit sets: the same terms the scan over every subgraph
+		// below adds, added in the same order (foreign, then common, then titles; each in subgraph order), so the sum is
+		// bit-for-bit the same. The step's midpoint lies on its row (column) and halfway between its two columns (rows).
+		private double GroupCost(double cost, double len, bool horizontal, int x, int y, int nx, int ny, GroupLines gx, GroupLines gy)
+		{
+			ulong inX, inY, titleX, titleY, beside;
+			if (horizontal)
+			{
+				var i = Math.Min(x, nx);
+				inX = gx.InMid[i];
+				titleX = gx.TitleMid[i];
+				inY = gy.InLine[y];
+				titleY = gy.TitleLine[y];
+				beside = inX & gy.BorderLine[y];
+			}
+			else
+			{
+				var i = Math.Min(y, ny);
+				inX = gx.InLine[x];
+				titleX = gx.TitleLine[x];
+				inY = gy.InMid[i];
+				titleY = gy.TitleMid[i];
+				beside = inY & gx.BorderLine[x];
+			}
+
+			var inside = inX & inY;
+			for (var m = _foreignMask & (inside | beside); m != 0; m &= m - 1)
+			{
+				if ((inside & m & (~m + 1)) != 0)
+					cost += ForeignGroupCost + (len * 2);
+				else
+					cost += len * 0.6;
+			}
+			for (var m = _commonMask & ~inside; m != 0; m &= m - 1)
+				cost += LeaveGroupCost + len;
+			for (var m = titleX & titleY; m != 0; m &= m - 1)
+				cost += 90 + len;
+			return cost;
+		}
+
+		// the reference scan, for drawings with more subgraphs than the bit sets hold
+		private double GroupCost(double cost, double len, int nd, double mx, double my, List<GroupBox> foreign, List<GroupBox> common)
+		{
+			foreach (var g in foreign)
+			{
+				if (mx > g.X && mx < g.X + g.W && my > g.Y && my < g.Y + g.H)
+					cost += ForeignGroupCost + (len * 2);
+				// running alongside a foreign subgraph border reads as belonging to it
+				else if (nd is 0 or 2 && mx > g.X && mx < g.X + g.W && (Math.Abs(my - (g.Y - Margin)) < 0.6 || Math.Abs(my - (g.Y + g.H + Margin)) < 0.6))
+					cost += len * 0.6;
+				else if (nd is 1 or 3 && my > g.Y && my < g.Y + g.H && (Math.Abs(mx - (g.X - Margin)) < 0.6 || Math.Abs(mx - (g.X + g.W + Margin)) < 0.6))
+					cost += len * 0.6;
+			}
+			foreach (var g in common)
+			{
+				if (!(mx > g.X && mx < g.X + g.W && my > g.Y && my < g.Y + g.H))
+					cost += LeaveGroupCost + len;
+			}
+
+			foreach (var g in _allGroups)
+			{
+				// keep lines off the subgraph's title text
+				if (g.LabelW > 0 && mx > g.X && mx < g.X + g.LabelW && my > g.Y && my < g.Y + 30)
+					cost += 90 + len;
+			}
+			return cost;
+		}
+	}
+
+	/// <summary>
+	/// For each grid line along one axis, and each midpoint between two neighbouring lines, the subgraphs (one bit each) it
+	/// falls strictly inside, inside the title band, and on the border lane (within 0.6px of the line just outside the
+	/// subgraph); evaluated with exactly the comparisons the reference scan makes.
+	/// </summary>
+	private sealed class GroupLines
+	{
+		internal readonly ulong[] InLine;
+		internal readonly ulong[] InMid;
+		internal readonly ulong[] TitleLine;
+		internal readonly ulong[] TitleMid;
+		internal readonly ulong[] BorderLine;
+
+		// extent: the subgraph's interior (Lo, Hi), its title band's far end (from Lo), and its two border lanes
+		internal GroupLines(double[] lines, GroupBox[] groups, Func<GroupBox, (double Lo, double Hi, double TitleHi, double LaneLo, double LaneHi)> extent)
+		{
+			var n = lines.Length;
+			InLine = new ulong[n];
+			InMid = new ulong[Math.Max(0, n - 1)];
+			TitleLine = new ulong[n];
+			TitleMid = new ulong[Math.Max(0, n - 1)];
+			BorderLine = new ulong[n];
+			for (var gi = 0; gi < groups.Length; gi++)
+			{
+				var bit = 1UL << gi;
+				var (lo, hi, titleHi, laneLo, laneHi) = extent(groups[gi]);
+				var titled = groups[gi].LabelW > 0;
+				for (var i = 0; i < n; i++)
+				{
+					var v = lines[i];
+					if (v > lo && v < hi)
+						InLine[i] |= bit;
+					if (titled && v > lo && v < titleHi)
+						TitleLine[i] |= bit;
+					if (Math.Abs(v - laneLo) < 0.6 || Math.Abs(v - laneHi) < 0.6)
+						BorderLine[i] |= bit;
+					if (i + 1 < n)
+					{
+						var m = (v + lines[i + 1]) / 2;
+						if (m > lo && m < hi)
+							InMid[i] |= bit;
+						if (titled && m > lo && m < titleHi)
+							TitleMid[i] |= bit;
+					}
+				}
+			}
 		}
 	}
 
