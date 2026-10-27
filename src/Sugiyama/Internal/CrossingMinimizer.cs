@@ -153,6 +153,7 @@ internal static class CrossingMinimizer
 	/// </summary>
 	private static void InsertionRefinement(GraphBuffer graph, CancellationToken ct)
 	{
+		var ends = new LayerEnds(graph);
 		bool changed;
 		var rounds = 0;
 		do
@@ -165,21 +166,36 @@ internal static class CrossingMinimizer
 				if (nodes.Length is <= 1 or > FullPairwiseSwapLayerSizeLimit)
 					continue;
 
+				// the neighbouring layers stay put while this one is refined: each node's edge ends there are fixed
+				ends.Load(layer);
+				var baseline = CrossingsForLayer(graph, layer);
 				for (var from = 0; from < nodes.Length; from++)
 				{
-					var baseline = CrossingsForLayer(graph, layer);
 					if (baseline == 0)
 						break;
 
+					// Moving the node only changes its crossings with the nodes it passes: the crossings for each target
+					// position are the baseline plus the change for every node passed on the way there.
+					var v = nodes[from];
 					var bestTo = from;
 					var bestCrossings = baseline;
-					for (var to = 0; to < nodes.Length; to++)
+					var c = baseline;
+					for (var to = from - 1; to >= 0; to--)
 					{
-						if (to == from)
+						c += ends.Crossings(v, nodes[to]) - ends.Crossings(nodes[to], v);
+						ends.Scratch[to] = c;
+					}
+					for (var to = 0; to < from; to++)
+					{
+						if (ends.Scratch[to] >= bestCrossings)
 							continue;
-						MoveNode(graph, nodes, from, to);
-						var c = CrossingsForLayer(graph, layer);
-						MoveNode(graph, nodes, to, from);
+						bestCrossings = ends.Scratch[to];
+						bestTo = to;
+					}
+					c = baseline;
+					for (var to = from + 1; to < nodes.Length; to++)
+					{
+						c += ends.Crossings(nodes[to], v) - ends.Crossings(v, nodes[to]);
 						if (c >= bestCrossings)
 							continue;
 						bestCrossings = c;
@@ -189,10 +205,104 @@ internal static class CrossingMinimizer
 					if (bestTo == from)
 						continue;
 					MoveNode(graph, nodes, from, bestTo);
+					baseline = bestCrossings;
 					changed = true;
 				}
 			}
 		} while (changed && ++rounds < 8);
+	}
+
+	/// <summary>
+	/// The edge ends of one layer's nodes in the layers above and below (positions there), as <see cref="CollectEdgePairs"/>
+	/// sees them, for counting the crossings between two nodes' edges.
+	/// </summary>
+	private sealed class LayerEnds(GraphBuffer graph)
+	{
+		private readonly int[] _slot = new int[graph.NodeCount];
+		private int[] _upStart = new int[1];
+		private int[] _downStart = new int[1];
+		private readonly List<int> _up = [];
+		private readonly List<int> _down = [];
+		internal int[] Scratch = [];
+
+		internal void Load(int layer)
+		{
+			var nodes = graph.LayerNodes[layer];
+			var n = nodes.Length;
+			for (var i = 0; i < n; i++)
+				_slot[nodes[i]] = i;
+			if (_upStart.Length < n + 1)
+			{
+				_upStart = new int[n + 1];
+				_downStart = new int[n + 1];
+				Scratch = new int[n];
+			}
+
+			var upLists = new List<int>[n];
+			var downLists = new List<int>[n];
+			for (var i = 0; i < n; i++)
+			{
+				upLists[i] = [];
+				downLists[i] = [];
+			}
+			if (layer > 0)
+			{
+				foreach (var node in graph.LayerNodes[layer - 1])
+				{
+					for (var j = graph.OutAdjStart[node]; j < graph.OutAdjStart[node + 1]; j++)
+					{
+						var to = graph.OutAdjNeighbor[j];
+						if (graph.Layers[to] == layer)
+							upLists[_slot[to]].Add(graph.NodePositionInLayer[node]);
+					}
+				}
+			}
+			if (layer < graph.LayerCount - 1)
+			{
+				foreach (var node in nodes)
+				{
+					for (var j = graph.OutAdjStart[node]; j < graph.OutAdjStart[node + 1]; j++)
+					{
+						var to = graph.OutAdjNeighbor[j];
+						if (graph.Layers[to] == layer + 1)
+							downLists[_slot[node]].Add(graph.NodePositionInLayer[to]);
+					}
+				}
+			}
+
+			_up.Clear();
+			_down.Clear();
+			for (var i = 0; i < n; i++)
+			{
+				_upStart[i] = _up.Count;
+				_up.AddRange(upLists[i]);
+				_downStart[i] = _down.Count;
+				_down.AddRange(downLists[i]);
+			}
+			_upStart[n] = _up.Count;
+			_downStart[n] = _down.Count;
+		}
+
+		/// <summary>Crossings between the edges of <paramref name="left"/> and <paramref name="right"/> with left placed before right.</summary>
+		internal int Crossings(int left, int right)
+		{
+			int l = _slot[left], r = _slot[right];
+			return Inverted(_up, _upStart, l, r) + Inverted(_down, _downStart, l, r);
+		}
+
+		private static int Inverted(List<int> ends, int[] start, int l, int r)
+		{
+			var count = 0;
+			for (var i = start[l]; i < start[l + 1]; i++)
+			{
+				for (var j = start[r]; j < start[r + 1]; j++)
+				{
+					if (ends[i] > ends[j])
+						count++;
+				}
+			}
+			return count;
+		}
 	}
 
 	private static void MoveNode(GraphBuffer graph, int[] nodes, int from, int to)

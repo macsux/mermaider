@@ -336,6 +336,8 @@ Only what the code does:
 - **CSR adjacency.** In- and out-neighbours are stored in compressed sparse row form, as one offset array and one
   neighbour array. A barycentre sweep visits each node's neighbours in time proportional to its degree.
 - **Skipped work.** Layers whose adjoining crossings are already zero skip the swap and insertion passes.
+- **Incremental insertion counts.** Moving a node only changes its crossings with the nodes it passes, so insertion
+  refinement counts every candidate slot from the node's own edges instead of recounting the whole layer pair.
 - **Guards against quadratic blow-up.**
   - A layer wider than 60 nodes falls back from all-pairs swaps to adjacent swaps and skips insertion refinement.
   - Insertion refinement stops after 8 rounds.
@@ -346,6 +348,9 @@ Only what the code does:
   edge first needs a search.
 - **Bucketed segment lookups.** Routed segments are indexed by grid row and column. A step's cost visits only the
   segments that could run parallel to it or cross it, merged back in routing order so the sum stays the same.
+- **Subgraph bit sets.** For each grid line, and each midpoint between two lines, the grid keeps which subgraphs (up to
+  64, one bit each) it falls inside, in the title band of, or on the border lane of. A step's cost visits only the
+  subgraphs that add to it, in subgraph order, so the sum stays the same.
 - **Reused searches.** A rip-up pass that asks the same question against exactly the same routed segments reuses
   the earlier answer.
 - **Cached step costs.** A step's cost depends only on the cell, the direction and whether it bends. Within one
