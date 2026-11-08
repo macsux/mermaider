@@ -11,6 +11,30 @@ internal static class NodeSizing
 	internal static string WrapLabel(string label) =>
 		LabelWrap.Wrap(label, MaxContentWidth, RenderConstants.FontSizes.NodeLabel, RenderConstants.FontWeights.NodeLabel);
 
+	/// <summary>Space between an icon's background and its edge (Mermaid's half padding).</summary>
+	internal const double IconPadding = 8;
+
+	/// <summary>Gap between an icon (or its background) and its label.</summary>
+	internal const double IconLabelGap = 6;
+
+	/// <summary>Size of a node: icon-shape nodes are sized for their icon and label, every other shape for its label.</summary>
+	internal static (double Width, double Height) Estimate(MermaidNode node) =>
+		node is { Shape: NodeShape.Icon, Icon: { } icon } ? EstimateIcon(node.Label, icon) : Estimate(node.Label, node.Shape);
+
+	/// <summary>Side of the square an icon-shape node's icon (with its background, if any) takes up.</summary>
+	internal static double IconBoxSize(NodeIcon icon) =>
+		icon.Form == IconForm.None ? icon.Height : icon.Height + (2 * IconPadding);
+
+	/// <summary>An icon-shape node: the icon box with its label stacked above or below it, as wide as the wider of the two.</summary>
+	private static (double Width, double Height) EstimateIcon(string label, NodeIcon icon)
+	{
+		var box = IconBoxSize(icon);
+		if (label.Length == 0)
+			return (box, box);
+		var metrics = TextMetrics.MeasureMultiline(WrapLabel(label).AsSpan(), RenderConstants.FontSizes.NodeLabel, RenderConstants.FontWeights.NodeLabel);
+		return (Math.Max(box, metrics.Width + 8), box + IconLabelGap + metrics.Height);
+	}
+
 	internal static (double Width, double Height) Estimate(string label, NodeShape shape)
 	{
 		label = WrapLabel(label);

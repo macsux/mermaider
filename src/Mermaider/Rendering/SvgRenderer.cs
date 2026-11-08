@@ -451,7 +451,39 @@ internal static class SvgRenderer
 			case NodeShape.ForkJoin:
 				AppendForkJoin(sb, x, y, w, h);
 				break;
+			case NodeShape.Icon when node.Icon is { } icon:
+				AppendIconShape(sb, ds, node, icon, family, fill, stroke, sw);
+				break;
 		}
+	}
+
+	/// <summary>
+	/// An icon-shape node: the icon, on its <c>form</c> background if it has one, centred in the icon box at the top of the
+	/// node (label below) or at its bottom (label above). The icon takes the node's <c>stroke</c> style as its colour, as
+	/// Mermaid does; registered artwork keeps its own colours.
+	/// </summary>
+	private static void AppendIconShape(StringBuilder sb, DesignSystem ds, PositionedNode node, NodeIcon icon, ColorFamily family, string fill, string stroke, string sw)
+	{
+		var box = NodeSizing.IconBoxSize(icon);
+		var cx = node.X + (node.Width / 2);
+		var top = icon.LabelPosition == IconLabelPosition.Top ? node.Y + node.Height - box : node.Y;
+		var (bx, cy) = (cx - (box / 2), top + (box / 2));
+		switch (icon.Form)
+		{
+			case IconForm.Square:
+				AppendRect(sb, bx, top, box, box, "0", fill, stroke, sw);
+				_ = sb.Append("\n  ");
+				break;
+			case IconForm.Rounded:
+				AppendRect(sb, bx, top, box, box, DesignSystem.Num(ds.Spec.NodeRadius + 4), fill, stroke, sw);
+				_ = sb.Append("\n  ");
+				break;
+			case IconForm.Circle:
+				AppendCircle(sb, bx, top, box, box, fill, stroke, sw);
+				_ = sb.Append("\n  ");
+				break;
+		}
+		IconArt.Append(sb, ds, icon.Name, cx, cy, icon.Height, InlineStyleValue(node.InlineStyle, "stroke") ?? family.Ink);
 	}
 
 	private static void AppendRect(StringBuilder sb, double x, double y, double w, double h, string rx, string fill, string stroke, string sw) =>
@@ -626,11 +658,19 @@ internal static class SvgRenderer
 
 	private static void AppendNodeLabel(StringBuilder sb, DesignSystem ds, PositionedNode node)
 	{
-		if (node.Shape is NodeShape.StateStart or NodeShape.StateEnd or NodeShape.ForkJoin && string.IsNullOrEmpty(node.Label))
+		if (node.Shape is NodeShape.StateStart or NodeShape.StateEnd or NodeShape.ForkJoin or NodeShape.Icon && string.IsNullOrEmpty(node.Label))
 			return;
 
 		var cx = node.X + (node.Width / 2);
 		var cy = node.Y + (node.Height / 2);
+		if (node is { Shape: NodeShape.Icon, Icon: { } icon })
+		{
+			// the label fills the node outside the icon box: above it for pos "t", below it otherwise
+			var labelHeight = node.Height - NodeSizing.IconBoxSize(icon) - NodeSizing.IconLabelGap;
+			cy = icon.LabelPosition == IconLabelPosition.Top
+				? node.Y + (labelHeight / 2)
+				: node.Y + node.Height - (labelHeight / 2);
+		}
 		var textColor = InlineStyleValue(node.InlineStyle, "color") ?? "var(--_text)";
 
 		if (node.IsMarkdown)

@@ -30,6 +30,9 @@ public sealed record PositionedNode
 
 	public bool IsMarkdown { get; init; }
 
+	/// <summary>The icon of a <see cref="NodeShape.Icon"/> node; null for every other shape.</summary>
+	public NodeIcon? Icon { get; init; }
+
 	/// <summary>Semantic role the node opted into with the class <c>success</c>, <c>failure</c>, <c>warning</c> or <c>info</c>; null otherwise.</summary>
 	public string? SemanticRole { get; init; }
 }
