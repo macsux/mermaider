@@ -29,6 +29,7 @@ Three-stage pipeline: **Parse** → **Layout** → **Render**
 3. **Rendering** (`src/Mermaider/Rendering/`): Pooled StringBuilder produces SVG string
 
 Flowchart node shapes include the two parallelograms (`[/text/]`, `[\text\]`) as well as the two trapezoids.
+Mermaid's expanded syntax `A@{ shape: name }` maps names and aliases to `NodeShape` in `FlowchartParser.ShapeNames`; shapes with no bracket form (appended to the end of `NodeShape`) are drawn in `Rendering/SvgRenderer.ExpandedShapes.cs`.
 
 Supported diagram types: flowchart, state, sequence, class, ER, pie, quadrant, timeline, gitgraph, radar, treemap, venn, mindmap, gantt, journey, C4, sankey, xychart, requirement, packet, kanban, architecture, block, treeview.
 

@@ -32,6 +32,19 @@ public class FlowchartSpecTests
 			"""), "svg");
 
 	[Test]
+	public Task Expanded_shapes() =>
+		Verifier.Verify(MermaidRenderer.RenderSvg("""
+			flowchart LR
+			a@{ shape: notch-rect, label: "Card" } --> b@{ shape: hourglass } --> c@{ shape: bolt } --> d@{ shape: brace, label: "Comment" }
+			e@{ shape: brace-r, label: "Right" } --> f@{ shape: braces, label: "Both" } --> g@{ shape: delay, label: "Delay" } --> h@{ shape: h-cyl, label: "Direct access" }
+			i@{ shape: lin-cyl, label: "Disk" } --> j@{ shape: curv-trap, label: "Display" } --> k@{ shape: div-rect, label: "Divided" } --> l@{ shape: doc, label: "Document" }
+			m@{ shape: tri, label: "Extract" } --> n@{ shape: win-pane, label: "Internal" } --> o@{ shape: f-circ } --> p@{ shape: lin-doc, label: "Lined doc" }
+			q@{ shape: lin-rect, label: "Lined" } --> r@{ shape: notch-pent, label: "Loop limit" } --> s@{ shape: flip-tri, label: "Manual file" } --> t@{ shape: sl-rect, label: "Manual input" }
+			u@{ shape: docs, label: "Documents" } --> v@{ shape: st-rect, label: "Processes" } --> w@{ shape: flag, label: "Paper tape" } --> x@{ shape: bow-rect, label: "Stored data" }
+			y@{ shape: cross-circ } --> z@{ shape: tag-doc, label: "Tagged doc" } --> aa@{ shape: tag-rect, label: "Tagged" } --> ab@{ shape: text, label: "Text block" }
+			"""), "svg");
+
+	[Test]
 	public Task Direction_LR() =>
 		Verifier.Verify(MermaidRenderer.RenderSvg("""
 			graph LR

@@ -26,6 +26,14 @@ graph TD
   State --> API
 ```
 
+Mermaid's expanded node syntax, `A@{ shape: doc, label: "Report" }`, picks any of Mermaid's named shapes by short name or alias (`rect`, `rounded`, `stadium`, `diam`, `hex`, `cyl`, `doc`, `docs`, `delay`, `bolt`, `tri`, `flag`, `text`, ...; case-insensitive). The ones with a classic bracket form draw exactly as that form does. `hourglass`, `bolt`, `f-circ`, `cross-circ`, `sm-circ`, `fr-circ` and `fork` draw no label, as in Mermaid. An unknown shape name leaves the node's shape as it was. Mermaid's image shape (`img:`) isn't supported.
+
+```text
+flowchart LR
+  in@{ shape: manual-input, label: "Order" } --> ok@{ shape: decision, label: "Valid?" }
+  ok -->|yes| db@{ shape: cyl, label: "Orders" } --> out@{ shape: docs, label: "Invoices" }
+```
+
 Icon-shape nodes (`A@{ icon: "name", form: "square", label: "Text", pos: "t", h: 60 }`) draw an icon from `IconRegistry`, the same built-in and registered icons architecture diagrams use. `form` is `square`, `circle` or `rounded` (no background when omitted), `pos` puts the label below (`b`, the default) or above (`t`), and `h` sets the icon height (48 by default, which is also the minimum). An unregistered name, such as a Font Awesome `fa:` icon, draws the generic fallback glyph.
 
 ```text

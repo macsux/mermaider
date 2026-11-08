@@ -17,6 +17,12 @@ internal static class NodeSizing
 	/// <summary>Gap between an icon (or its background) and its label.</summary>
 	internal const double IconLabelGap = 6;
 
+	/// <summary>How far each copy behind a stacked shape (multi-document, multi-process) is offset.</summary>
+	internal const double StackOffset = 5;
+
+	/// <summary>Distance of a window-pane shape's inner lines from its top and left edges.</summary>
+	internal const double WindowPaneInset = 10;
+
 	/// <summary>Size of a node: icon-shape nodes are sized for their icon and label, every other shape for its label.</summary>
 	internal static (double Width, double Height) Estimate(MermaidNode node) =>
 		node is { Shape: NodeShape.Icon, Icon: { } icon } ? EstimateIcon(node.Label, icon) : Estimate(node.Label, node.Shape);
@@ -75,6 +81,59 @@ internal static class NodeSizing
 				return (24, 24);
 			case NodeShape.ForkJoin:
 				return (120, 8);
+
+			// label-less expanded shapes keep Mermaid's fixed size
+			case NodeShape.FilledCircle:
+				return (14, 14);
+			case NodeShape.Hourglass:
+				return (30, 30);
+			case NodeShape.Bolt:
+				return (35, 70);
+			case NodeShape.CrossedCircle:
+				return (60, 60);
+
+			case NodeShape.Triangle or NodeShape.FlippedTriangle:
+				// the label sits in the wide half of the triangle
+				width = (metrics.Width * 2) + (RenderConstants.NodePadding.Horizontal * 2);
+				height = (metrics.Height * 2) + (RenderConstants.NodePadding.Vertical * 3);
+				break;
+			case NodeShape.Braces or NodeShape.CurvedTrapezoid:
+				width += 24;
+				break;
+			case NodeShape.HorizontalCylinder or NodeShape.BowTieRectangle:
+				width += 20;
+				break;
+			case NodeShape.NotchedRectangle or NodeShape.NotchedPentagon or NodeShape.BraceLeft or NodeShape.BraceRight or NodeShape.Delay:
+				width += 12;
+				break;
+			case NodeShape.LinedRectangle or NodeShape.TaggedRectangle:
+				width += 8;
+				break;
+			case NodeShape.LinedCylinder:
+				height += 20;
+				break;
+			case NodeShape.Document or NodeShape.TaggedDocument or NodeShape.Flag or NodeShape.DividedRectangle:
+				height += 12;
+				break;
+			case NodeShape.LinedDocument:
+				width += 8;
+				height += 12;
+				break;
+			case NodeShape.StackedDocument:
+				width += StackOffset * 2;
+				height += 12 + (StackOffset * 2);
+				break;
+			case NodeShape.StackedRectangle:
+				width += StackOffset * 2;
+				height += StackOffset * 2;
+				break;
+			case NodeShape.WindowPane:
+				width += WindowPaneInset;
+				height += WindowPaneInset;
+				break;
+			case NodeShape.SlopedRectangle:
+				height += 10;
+				break;
 		}
 
 		width = Math.Max(width, 64);

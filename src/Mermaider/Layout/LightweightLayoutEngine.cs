@@ -38,8 +38,9 @@ internal static class LightweightLayoutEngine
 				Outline = node.Shape switch
 				{
 					Models.NodeShape.Diamond => PortOutline.Diamond,
-					Models.NodeShape.Circle or Models.NodeShape.DoubleCircle => PortOutline.Ellipse,
-					Models.NodeShape.Hexagon => PortOutline.Centre,
+					Models.NodeShape.Circle or Models.NodeShape.DoubleCircle or Models.NodeShape.FilledCircle or Models.NodeShape.CrossedCircle => PortOutline.Ellipse,
+					Models.NodeShape.Hexagon or Models.NodeShape.Triangle or Models.NodeShape.FlippedTriangle
+						or Models.NodeShape.Hourglass or Models.NodeShape.Bolt => PortOutline.Centre,
 					_ => PortOutline.Rectangle,
 				},
 			});
@@ -57,7 +58,7 @@ internal static class LightweightLayoutEngine
 		// Only apply in flat (no-subgraph) non-state diagrams:
 		//   - subgraphs: NestingGraphRanker border-node constraints conflict with the extra minLength
 		//   - state diagrams: state transitions are already spaced correctly without the bonus
-		var isStateDiagramEarly = graph.Nodes.Values.Any(n => n.Shape is Models.NodeShape.StateStart or Models.NodeShape.StateEnd);
+		var isStateDiagramEarly = !graph.IsFlowchart && graph.Nodes.Values.Any(n => n.Shape is Models.NodeShape.StateStart or Models.NodeShape.StateEnd);
 		var applyLabelMinLength = false;
 		for (var ei = 0; ei < graph.Edges.Count; ei++)
 		{
