@@ -663,6 +663,9 @@ MermaidRenderer.RenderSvg("""
 
 <p align="center"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/nullean/mermaider/main/.github/readme/flowchart.dark.svg" /><img src="https://raw.githubusercontent.com/nullean/mermaider/main/.github/readme/flowchart.light.svg" alt="Flowchart" /></picture></p>
 
+Mermaid's expanded shapes, `A@{ shape: doc, label: "Report" }`, draw by short name or alias (all of Mermaid's
+documented shapes, from `rect` and `cyl` to `docs`, `bolt`, `delay` and `flag`).
+
 Icon-shape nodes, `A@{ icon: "aws:compute", form: "square", label: "EC2", pos: "t", h: 60 }`, draw any icon
 the [`IconRegistry`](#built-in-icons) resolves, built-in or [registered](#adding-your-own-icons). `form`
 (`square`, `circle`, `rounded`; none by default), `label`, `pos` (`b` default, `t`) and `h` (48 default and

@@ -1,3 +1,4 @@
+using System.Collections.Frozen;
 using System.Globalization;
 using System.Text.RegularExpressions;
 using Mermaider.Models;
@@ -608,8 +609,67 @@ internal static partial class FlowchartParser
 	}
 
 	/// <summary>
+	/// Mermaid's expanded shape names (short names and aliases, from Mermaid's shape table) and the shape each one draws.
+	/// </summary>
+	private static readonly FrozenDictionary<string, NodeShape> ShapeNames = new (NodeShape Shape, string[] Names)[]
+	{
+		(NodeShape.Rectangle, ["rect", "proc", "process", "rectangle"]),
+		(NodeShape.Rounded, ["rounded", "event"]),
+		(NodeShape.Stadium, ["stadium", "terminal", "pill"]),
+		(NodeShape.Subroutine, ["fr-rect", "subprocess", "subproc", "framed-rectangle", "subroutine"]),
+		(NodeShape.Cylinder, ["cyl", "db", "database", "cylinder"]),
+		(NodeShape.Circle, ["circle", "circ"]),
+		(NodeShape.Diamond, ["diam", "decision", "diamond", "question"]),
+		(NodeShape.Hexagon, ["hex", "hexagon", "prepare"]),
+		(NodeShape.Parallelogram, ["lean-r", "lean-right", "in-out"]),
+		(NodeShape.ParallelogramAlt, ["lean-l", "lean-left", "out-in"]),
+		(NodeShape.Trapezoid, ["trap-b", "priority", "trapezoid-bottom", "trapezoid"]),
+		(NodeShape.TrapezoidAlt, ["trap-t", "manual", "trapezoid-top", "inv-trapezoid"]),
+		(NodeShape.DoubleCircle, ["dbl-circ", "double-circle"]),
+		(NodeShape.Text, ["text"]),
+		(NodeShape.NotchedRectangle, ["notch-rect", "card", "notched-rectangle"]),
+		(NodeShape.LinedRectangle, ["lin-rect", "lined-rectangle", "lined-process", "lin-proc", "shaded-process"]),
+		(NodeShape.StateStart, ["sm-circ", "start", "small-circle"]),
+		(NodeShape.StateEnd, ["fr-circ", "stop", "framed-circle"]),
+		(NodeShape.ForkJoin, ["fork", "join"]),
+		(NodeShape.Hourglass, ["hourglass", "collate"]),
+		(NodeShape.BraceLeft, ["brace", "comment", "brace-l"]),
+		(NodeShape.BraceRight, ["brace-r"]),
+		(NodeShape.Braces, ["braces"]),
+		(NodeShape.Bolt, ["bolt", "com-link", "lightning-bolt"]),
+		(NodeShape.Document, ["doc", "document"]),
+		(NodeShape.Delay, ["delay", "half-rounded-rectangle"]),
+		(NodeShape.HorizontalCylinder, ["h-cyl", "das", "horizontal-cylinder"]),
+		(NodeShape.LinedCylinder, ["lin-cyl", "disk", "lined-cylinder"]),
+		(NodeShape.CurvedTrapezoid, ["curv-trap", "curved-trapezoid", "display"]),
+		(NodeShape.DividedRectangle, ["div-rect", "div-proc", "divided-rectangle", "divided-process"]),
+		(NodeShape.Triangle, ["tri", "extract", "triangle"]),
+		(NodeShape.WindowPane, ["win-pane", "internal-storage", "window-pane"]),
+		(NodeShape.FilledCircle, ["f-circ", "junction", "filled-circle"]),
+		(NodeShape.NotchedPentagon, ["notch-pent", "loop-limit", "notched-pentagon"]),
+		(NodeShape.FlippedTriangle, ["flip-tri", "manual-file", "flipped-triangle"]),
+		(NodeShape.SlopedRectangle, ["sl-rect", "manual-input", "sloped-rectangle"]),
+		(NodeShape.StackedDocument, ["docs", "documents", "st-doc", "stacked-document"]),
+		(NodeShape.StackedRectangle, ["st-rect", "procs", "processes", "stacked-rectangle"]),
+		(NodeShape.BowTieRectangle, ["bow-rect", "stored-data", "bow-tie-rectangle"]),
+		(NodeShape.CrossedCircle, ["cross-circ", "summary", "crossed-circle"]),
+		(NodeShape.TaggedDocument, ["tag-doc", "tagged-document"]),
+		(NodeShape.TaggedRectangle, ["tag-rect", "tagged-rectangle", "tag-proc", "tagged-process"]),
+		(NodeShape.Flag, ["flag", "paper-tape"]),
+		(NodeShape.Asymmetric, ["odd"]),
+		(NodeShape.LinedDocument, ["lin-doc", "lined-document"]),
+	}.SelectMany(entry => entry.Names.Select(name => (name, entry.Shape)))
+		.ToFrozenDictionary(pair => pair.name, pair => pair.Shape, StringComparer.OrdinalIgnoreCase);
+
+	/// <summary>Shapes Mermaid draws without their label (it clears the label of these).</summary>
+	private static bool DrawsNoLabel(NodeShape shape) =>
+		shape is NodeShape.StateStart or NodeShape.StateEnd or NodeShape.ForkJoin or NodeShape.FilledCircle
+			or NodeShape.Hourglass or NodeShape.Bolt or NodeShape.CrossedCircle;
+
+	/// <summary>
 	/// Applies an <c>@{ ... }</c> block to node <paramref name="id"/> (already registered by the caller). An <c>icon</c> key
-	/// makes it an icon-shape node; otherwise only a <c>label</c> is taken (other expanded shapes aren't supported yet).
+	/// makes it an icon-shape node; otherwise a known <c>shape</c> name sets its shape and <c>label</c> its label. An
+	/// unknown shape name keeps the shape the node already has.
 	/// </summary>
 	private static void ApplyShapeData(Dictionary<string, MermaidNode> nodes, string id, Dictionary<string, string> data)
 	{
@@ -636,9 +696,15 @@ internal static partial class FlowchartParser
 			// as Mermaid: an icon without a label shows no label
 			nodes[id] = new MermaidNode(id, label ?? "", NodeShape.Icon, Icon: new NodeIcon(iconName, form, position, height));
 		}
-		else if (label is not null)
+		else
 		{
-			nodes[id] = node with { Label = label };
+			if (data.TryGetValue("shape", out var shapeName) && ShapeNames.TryGetValue(shapeName.Trim(), out var shape))
+				node = node with { Shape = shape };
+			if (label is not null)
+				node = node with { Label = label };
+			if (DrawsNoLabel(node.Shape))
+				node = node with { Label = "" };
+			nodes[id] = node;
 		}
 	}
 

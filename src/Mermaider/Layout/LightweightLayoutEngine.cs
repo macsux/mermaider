@@ -38,8 +38,9 @@ internal static class LightweightLayoutEngine
 				Outline = node.Shape switch
 				{
 					Models.NodeShape.Diamond => PortOutline.Diamond,
-					Models.NodeShape.Circle or Models.NodeShape.DoubleCircle => PortOutline.Ellipse,
-					Models.NodeShape.Hexagon => PortOutline.Centre,
+					Models.NodeShape.Circle or Models.NodeShape.DoubleCircle or Models.NodeShape.FilledCircle or Models.NodeShape.CrossedCircle => PortOutline.Ellipse,
+					Models.NodeShape.Hexagon or Models.NodeShape.Triangle or Models.NodeShape.FlippedTriangle
+						or Models.NodeShape.Hourglass or Models.NodeShape.Bolt => PortOutline.Centre,
 					_ => PortOutline.Rectangle,
 				},
 			});

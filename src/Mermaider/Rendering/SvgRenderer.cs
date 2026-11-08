@@ -11,7 +11,7 @@ namespace Mermaider.Rendering;
 /// Converts a <see cref="PositionedGraph"/> to an SVG string via pooled StringBuilder.
 /// Pure string concatenation, no DOM.
 /// </summary>
-internal static class SvgRenderer
+internal static partial class SvgRenderer
 {
 	/// <summary>
 	/// Reads a user-supplied inline style value (from <c>style</c>/<c>classDef</c>/<c>linkStyle</c>)
@@ -454,6 +454,9 @@ internal static class SvgRenderer
 			case NodeShape.Icon when node.Icon is { } icon:
 				AppendIconShape(sb, ds, node, icon, family, fill, stroke, sw);
 				break;
+			default:
+				_ = TryAppendExpandedShape(sb, node, fill, stroke, sw);
+				break;
 		}
 	}
 
@@ -658,11 +661,14 @@ internal static class SvgRenderer
 
 	private static void AppendNodeLabel(StringBuilder sb, DesignSystem ds, PositionedNode node)
 	{
-		if (node.Shape is NodeShape.StateStart or NodeShape.StateEnd or NodeShape.ForkJoin or NodeShape.Icon && string.IsNullOrEmpty(node.Label))
+		if (node.Shape is NodeShape.StateStart or NodeShape.StateEnd or NodeShape.ForkJoin or NodeShape.Icon
+				or NodeShape.FilledCircle or NodeShape.Hourglass or NodeShape.Bolt or NodeShape.CrossedCircle
+			&& string.IsNullOrEmpty(node.Label))
 			return;
 
-		var cx = node.X + (node.Width / 2);
-		var cy = node.Y + (node.Height / 2);
+		var (dx, dy) = ExpandedShapeLabelOffset(node);
+		var cx = node.X + (node.Width / 2) + dx;
+		var cy = node.Y + (node.Height / 2) + dy;
 		if (node is { Shape: NodeShape.Icon, Icon: { } icon })
 		{
 			// the label fills the node outside the icon box: above it for pos "t", below it otherwise
