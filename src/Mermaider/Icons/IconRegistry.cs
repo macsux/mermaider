@@ -4,7 +4,8 @@ using System.Text;
 namespace Mermaider.Icons;
 
 /// <summary>
-/// Maps icon names to sanitized, embeddable SVG markup for architecture-diagram services and groups.
+/// Maps icon names to sanitized, embeddable SVG markup for architecture-diagram services and groups and flowchart
+/// icon-shape nodes (<c>A@{ icon: "name" }</c>).
 /// <para>
 /// Ships a small built-in set — Mermaid's default architecture icons (<c>cloud</c>, <c>database</c>,
 /// <c>disk</c>, <c>internet</c>, <c>server</c>), a <c>generic</c> fallback glyph, and a curated

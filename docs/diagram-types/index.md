@@ -26,6 +26,14 @@ graph TD
   State --> API
 ```
 
+Icon-shape nodes (`A@{ icon: "name", form: "square", label: "Text", pos: "t", h: 60 }`) draw an icon from `IconRegistry`, the same built-in and registered icons architecture diagrams use. `form` is `square`, `circle` or `rounded` (no background when omitted), `pos` puts the label below (`b`, the default) or above (`t`), and `h` sets the icon height (48 by default, which is also the minimum). An unregistered name, such as a Font Awesome `fa:` icon, draws the generic fallback glyph.
+
+```text
+flowchart LR
+  user@{ icon: "fa:user", form: "circle", label: "User" } --> api@{ icon: "aws:compute", form: "rounded", label: "API" }
+  api --> db@{ icon: "database", label: "Orders" }
+```
+
 ### Sequence
 
 Participant interaction diagrams (`sequenceDiagram`) with actors, notes, `loop` and `alt` blocks, and activation bars.

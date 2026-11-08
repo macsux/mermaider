@@ -32,6 +32,7 @@ internal static class EnumNames
 		NodeShape.StateStart => "statestart",
 		NodeShape.StateEnd => "stateend",
 		NodeShape.ForkJoin => "forkjoin",
+		NodeShape.Icon => "icon",
 		_ => shape.ToString().ToLowerInvariant(),
 	};
 

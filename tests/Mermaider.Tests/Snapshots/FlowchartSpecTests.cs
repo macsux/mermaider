@@ -22,6 +22,16 @@ public class FlowchartSpecTests
 			"""), "svg");
 
 	[Test]
+	public Task Icon_shape() =>
+		Verifier.Verify(MermaidRenderer.RenderSvg("""
+			flowchart LR
+			A@{ icon: "aws:compute", form: "square", label: "Compute", pos: "t", h: 60 } --> B@{ icon: "database", label: "Database" }
+			B --> C@{ icon: "fa:user", form: "circle" }
+			C --> D@{ icon: "cloud", form: "rounded", label: "Cloud" }
+			D --> E[Plain]
+			"""), "svg");
+
+	[Test]
 	public Task Direction_LR() =>
 		Verifier.Verify(MermaidRenderer.RenderSvg("""
 			graph LR

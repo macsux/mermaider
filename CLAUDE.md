@@ -18,7 +18,7 @@ See AGENTS.md for project conventions and architecture.
   the shared components in `Rendering/DesignSystem*.cs` (`DesignSystem.For(context)` … `ds.Close(sb)`) — no literal hex,
   ad-hoc `color-mix` ratios or font sizes. See `DESIGN.md`
 - Architecture diagrams (`architecture-beta`) use a bespoke directional-grid layout (`Layout/ArchitectureLayout.cs`), not Sugiyama — edges carry explicit L/R/T/B sides, which don't map onto a layered graph
-- Icons (architecture services/groups) resolve via `Mermaider.Icons.IconRegistry`: a small built-in set (Mermaid defaults + curated AWS/GCP/Azure + full Elastic, all original placeholder glyphs, not official trademarked logos) plus user registrations via `IconRegistry.Register`. Icons render as `<image href="data:image/svg+xml;base64,...">`; `SvgSanitizer` has one narrow, regex-anchored exception permitting `href` only on `<image>` with a base64 `data:image/svg+xml|png` value — icons are also sanitized once at registration time
+- Icons (architecture services/groups, flowchart icon-shape nodes `A@{ icon: ... }`) resolve via `Mermaider.Icons.IconRegistry` and are drawn by `Rendering/IconArt.cs`: a small built-in set (Mermaid defaults + curated AWS/GCP/Azure + full Elastic, all original placeholder glyphs, not official trademarked logos) plus user registrations via `IconRegistry.Register`. Icons render as `<image href="data:image/svg+xml;base64,...">`; `SvgSanitizer` has one narrow, regex-anchored exception permitting `href` only on `<image>` with a base64 `data:image/svg+xml|png` value — icons are also sanitized once at registration time
 
 ## Testing
 

@@ -50,8 +50,8 @@ public sealed record GraphNote(string TargetNodeId, string Text, GraphNotePositi
 
 public enum GraphNotePosition { Left, Right }
 
-/// <summary>A single node in the parsed graph.</summary>
-public readonly record struct MermaidNode(string Id, string Label, NodeShape Shape, bool IsMarkdown = false);
+/// <summary>A single node in the parsed graph; <paramref name="Icon"/> is set for <see cref="NodeShape.Icon"/> nodes.</summary>
+public readonly record struct MermaidNode(string Id, string Label, NodeShape Shape, bool IsMarkdown = false, NodeIcon? Icon = null);
 
 /// <summary>A directed edge between two nodes.</summary>
 public sealed record MermaidEdge(

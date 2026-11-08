@@ -26,7 +26,9 @@ internal static class AsciiFlowchartRenderer
 		{
 			if (!graph.Nodes.TryGetValue(id, out var node))
 				continue;
-			var label = AsciiCanvas.Fit(Flatten(node.Label ?? id), widest, options.Ascii);
+			// an icon-shape node without a label shows its icon's name: text has no icon to draw
+			var text = node is { Shape: NodeShape.Icon, Label.Length: 0, Icon: { } icon } ? icon.Name : node.Label ?? id;
+			var label = AsciiCanvas.Fit(Flatten(text), widest, options.Ascii);
 			labels[id] = label;
 			nodes.Add(new LayoutNode(id, label.Length + Padding, BoxHeight));
 		}

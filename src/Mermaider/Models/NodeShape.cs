@@ -23,5 +23,8 @@ public enum NodeShape
 	ParallelogramAlt,
 	StateStart,
 	StateEnd,
-	ForkJoin
+	ForkJoin,
+
+	/// <summary>Flowchart icon shape, <c>A@{ icon: "name" }</c>; the icon itself is on the node's <see cref="NodeIcon"/>.</summary>
+	Icon
 }

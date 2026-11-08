@@ -663,6 +663,11 @@ MermaidRenderer.RenderSvg("""
 
 <p align="center"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/nullean/mermaider/main/.github/readme/flowchart.dark.svg" /><img src="https://raw.githubusercontent.com/nullean/mermaider/main/.github/readme/flowchart.light.svg" alt="Flowchart" /></picture></p>
 
+Icon-shape nodes, `A@{ icon: "aws:compute", form: "square", label: "EC2", pos: "t", h: 60 }`, draw any icon
+the [`IconRegistry`](#built-in-icons) resolves, built-in or [registered](#adding-your-own-icons). `form`
+(`square`, `circle`, `rounded`; none by default), `label`, `pos` (`b` default, `t`) and `h` (48 default and
+minimum) behave as in Mermaid; unregistered names draw the generic fallback glyph.
+
 ### Sequence
 
 ```csharp

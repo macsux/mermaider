@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text.RegularExpressions;
 using Mermaider.Models;
 using Mermaider.Text;
@@ -132,7 +133,17 @@ internal static partial class FlowchartParser
 		for (var i = 0; i < lines.Length; i++)
 		{
 			var line = lines[i];
-			if (line.Contains("[\"") && !line.Contains("\"]"))
+			if (OpensShapeData(line))
+			{
+				// expanded node syntax spread over lines: A@{\n  icon: "x",\n  label: "y"\n}
+				while (++i < lines.Length)
+				{
+					line = line + " " + lines[i].Trim();
+					if (!OpensShapeData(line))
+						break;
+				}
+			}
+			else if (line.Contains("[\"") && !line.Contains("\"]"))
 			{
 				while (++i < lines.Length)
 				{
@@ -519,6 +530,12 @@ internal static partial class FlowchartParser
 		if (id is null)
 			return (null, text);
 
+		if (remaining.StartsWith("@{", StringComparison.Ordinal) && TryReadShapeData(remaining, out var data, out var consumed))
+		{
+			ApplyShapeData(nodes, id, data);
+			remaining = remaining[consumed..];
+		}
+
 		var classMatch = ClassShorthandPattern().Match(remaining);
 		if (classMatch.Success)
 		{
@@ -527,6 +544,102 @@ internal static partial class FlowchartParser
 		}
 
 		return (id, remaining);
+	}
+
+	// ========================================================================
+	// Expanded node syntax: A@{ key: value, ... }
+	// ========================================================================
+
+	/// <summary>True when <paramref name="line"/> has an <c>@{</c> whose closing brace is not on it.</summary>
+	private static bool OpensShapeData(string line)
+	{
+		var at = line.LastIndexOf("@{", StringComparison.Ordinal);
+		return at >= 0 && !TryReadShapeData(line[at..], out _, out _);
+	}
+
+	/// <summary>
+	/// Reads the <c>@{ ... }</c> block at the start of <paramref name="text"/> into its key/value pairs (keys lower-case,
+	/// quotes stripped). Commas and braces inside quoted values don't end a pair or the block.
+	/// </summary>
+	private static bool TryReadShapeData(string text, out Dictionary<string, string> data, out int consumed)
+	{
+		data = new Dictionary<string, string>(StringComparer.Ordinal);
+		consumed = 0;
+		var pairStart = 2;
+		var quote = '\0';
+		for (var i = 2; i < text.Length; i++)
+		{
+			var c = text[i];
+			if (quote != '\0')
+			{
+				if (c == quote)
+					quote = '\0';
+				continue;
+			}
+			switch (c)
+			{
+				case '"' or '\'':
+					quote = c;
+					break;
+				case ',':
+					AddShapeDataPair(data, text.AsSpan(pairStart, i - pairStart));
+					pairStart = i + 1;
+					break;
+				case '}':
+					AddShapeDataPair(data, text.AsSpan(pairStart, i - pairStart));
+					consumed = i + 1;
+					return true;
+			}
+		}
+		return false;
+	}
+
+	private static void AddShapeDataPair(Dictionary<string, string> data, ReadOnlySpan<char> pair)
+	{
+		var colon = pair.IndexOf(':');
+		if (colon <= 0)
+			return;
+		var key = pair[..colon].Trim().ToString().ToLowerInvariant();
+		var value = pair[(colon + 1)..].Trim();
+		if (value.Length >= 2 && value[0] is '"' or '\'' && value[^1] == value[0])
+			value = value[1..^1];
+		if (key.Length > 0)
+			data[key] = value.ToString();
+	}
+
+	/// <summary>
+	/// Applies an <c>@{ ... }</c> block to node <paramref name="id"/> (already registered by the caller). An <c>icon</c> key
+	/// makes it an icon-shape node; otherwise only a <c>label</c> is taken (other expanded shapes aren't supported yet).
+	/// </summary>
+	private static void ApplyShapeData(Dictionary<string, MermaidNode> nodes, string id, Dictionary<string, string> data)
+	{
+		var node = nodes[id];
+		var label = data.TryGetValue("label", out var rawLabel)
+			? MultilineUtils.NormalizeBrTags(rawLabel).Replace("\\n", "\n")
+			: null;
+
+		if (data.TryGetValue("icon", out var iconName) && iconName.Length > 0)
+		{
+			var form = data.GetValueOrDefault("form")?.ToLowerInvariant() switch
+			{
+				"square" => IconForm.Square,
+				"circle" => IconForm.Circle,
+				"rounded" => IconForm.Rounded,
+				_ => IconForm.None,
+			};
+			var position = data.GetValueOrDefault("pos") is { } pos && pos.Equals("t", StringComparison.OrdinalIgnoreCase)
+				? IconLabelPosition.Top
+				: IconLabelPosition.Bottom;
+			var height = data.TryGetValue("h", out var h) && double.TryParse(h, NumberStyles.Float, CultureInfo.InvariantCulture, out var parsed)
+				? Math.Max(parsed, NodeIcon.DefaultHeight)
+				: NodeIcon.DefaultHeight;
+			// as Mermaid: an icon without a label shows no label
+			nodes[id] = new MermaidNode(id, label ?? "", NodeShape.Icon, Icon: new NodeIcon(iconName, form, position, height));
+		}
+		else if (label is not null)
+		{
+			nodes[id] = node with { Label = label };
+		}
 	}
 
 	// ========================================================================
