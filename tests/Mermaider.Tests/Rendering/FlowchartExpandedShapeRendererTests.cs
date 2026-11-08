@@ -96,4 +96,23 @@ public partial class FlowchartExpandedShapeRendererTests
 		// same label, but the document is taller by its wave and the label stays clear of it
 		docOffset.Should().BeApproximately(rectOffset, 0.5);
 	}
+
+	[Test]
+	[Arguments("sm-circ")]
+	[Arguments("fr-circ")]
+	public void Start_and_stop_circles_keep_flowchart_spacing(string shape)
+	{
+		static double Gap(string svg) => RectY(NodeGroup(svg, "C")) - RectY(NodeGroup(svg, "B"));
+		static string Chain(string shape) =>
+			MermaidRenderer.RenderSvg($"flowchart TD\n  S@{{ shape: {shape} }} --> A[Step one] --> B[Step two] --> C[Step three]");
+
+		// the circles use the state-diagram shapes, but the flowchart isn't laid out as a state diagram
+		Gap(Chain(shape)).Should().BeApproximately(Gap(Chain("rect")), 0.01);
+	}
+
+	[GeneratedRegex("<rect[^>]* y=\"([-\\d.]+)\"")]
+	private static partial Regex RectYPattern();
+
+	private static double RectY(string group) =>
+		double.Parse(RectYPattern().Match(group).Groups[1].Value, System.Globalization.CultureInfo.InvariantCulture);
 }

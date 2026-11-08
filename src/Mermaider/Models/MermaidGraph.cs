@@ -44,6 +44,12 @@ public sealed record MermaidGraph
 		ReadOnlyDictionary<int, (string? SourceSubgraph, string? TargetSubgraph)>.Empty;
 
 	public IReadOnlyList<GraphNote> Notes { get; init; } = [];
+
+	/// <summary>
+	/// Parsed from a flowchart. Its start/stop circles (<c>@{ shape: sm-circ }</c>, <c>fr-circ</c>) use the state-diagram
+	/// shapes, so layout can't tell a flowchart from a state diagram by its shapes alone.
+	/// </summary>
+	internal bool IsFlowchart { get; init; }
 }
 
 public sealed record GraphNote(string TargetNodeId, string Text, GraphNotePosition Position);

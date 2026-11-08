@@ -58,7 +58,7 @@ internal static class LightweightLayoutEngine
 		// Only apply in flat (no-subgraph) non-state diagrams:
 		//   - subgraphs: NestingGraphRanker border-node constraints conflict with the extra minLength
 		//   - state diagrams: state transitions are already spaced correctly without the bonus
-		var isStateDiagramEarly = graph.Nodes.Values.Any(n => n.Shape is Models.NodeShape.StateStart or Models.NodeShape.StateEnd);
+		var isStateDiagramEarly = !graph.IsFlowchart && graph.Nodes.Values.Any(n => n.Shape is Models.NodeShape.StateStart or Models.NodeShape.StateEnd);
 		var applyLabelMinLength = false;
 		for (var ei = 0; ei < graph.Edges.Count; ei++)
 		{

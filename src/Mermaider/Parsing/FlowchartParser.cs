@@ -342,6 +342,7 @@ internal static partial class FlowchartParser
 
 		return new MermaidGraph
 		{
+			IsFlowchart = true,
 			Direction = direction,
 			Nodes = nodes,
 			NodeOrder = BuildSubgraphFirstNodeOrder(nodes, subgraphMap),
